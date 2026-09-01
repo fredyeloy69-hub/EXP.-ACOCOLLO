@@ -27,20 +27,19 @@ const auth = getAuth(db.app);
 const COLLAPSE_STORAGE_KEY = "acocollo_i2_grupos_colapsados";
 
 const ESTADO_COLOR = {
-  completa: "#e6ca65",
-  incompleta: "#d35400",
+  completa: "#e5b80b",
+  incompleta: "#e67e22",
   vacia: "#c0392b",
 };
 
 const AREA_COLORS = [
-  "#c5a059",
-  "#264653",
-  "#f4a261",
-  "#e76f51",
+  "#e5b80b",
+  "#e67e22",
+  "#c0392b",
   "#457b9d",
   "#1d3557",
-  "#e6ca65",
-  "#c5a059",
+  "#f1c40f",
+  "#e5b80b",
 ];
 
 function colorForArea(area) {
@@ -50,10 +49,10 @@ function colorForArea(area) {
 }
 
 const ESTADO_OPTIONS = [
-  { value: "pendientes", label: "Pendientes", color: "#e6ca65" },
-  { value: "incompleta", label: "Incompletas", color: "#d35400" },
+  { value: "pendientes", label: "Pendientes", color: "#e5b80b" },
+  { value: "incompleta", label: "Incompletas", color: "#e67e22" },
   { value: "vacia", label: "Vacías", color: "#c0392b" },
-  { value: "completa", label: "Completas", color: "#c5a059" },
+  { value: "completa", label: "Completas", color: "#f1c40f" },
   { value: "todas", label: "Todas", color: "#457b9d" },
 ];
 
@@ -69,14 +68,14 @@ const EVENTO_LABEL = {
 };
 
 const EVENTO_COLOR = {
-  archivo_subido: "#c5a059",
-  archivo_reemplazado: "#f4a261",
+  archivo_subido: "#e5b80b",
+  archivo_reemplazado: "#e67e22",
   archivo_borrado: "#c0392b",
   carpeta_creada: "#264653",
   carpeta_borrada: "#c0392b",
-  carpeta_movida: "#d35400",
-  carpeta_marcada_completa: "#c5a059",
-  carpeta_desmarcada: "#f4a261",
+  carpeta_movida: "#e67e22",
+  carpeta_marcada_completa: "#e5b80b",
+  carpeta_desmarcada: "#e67e22",
 };
 
 const EVENTO_ICONO = {
@@ -385,15 +384,16 @@ export default function Dashboard() {
         .acocollo-fondo-animado {
           background: linear-gradient(
             -45deg,
-            #0a141a,
-            #10222b,
-            #183a48,
-            #1f3d4c,
-            #10222b,
-            #0a141a
+            #0c1015,
+            #141c24,
+            #1f2d3d,
+            #2b3e55,
+            #1f2d3d,
+            #141c24,
+            #0c1015
           );
-          background-size: 400% 400%;
-          animation: acocolloGradiente 6s ease infinite;
+          background-size: 500% 500%;
+          animation: acocolloGradiente 5s ease infinite;
         }
         @keyframes acocolloGradiente {
           0%   { background-position: 0% 50%; }
@@ -407,10 +407,10 @@ export default function Dashboard() {
           position: sticky;
           top: 0;
           z-index: 40;
-          backdrop-filter: blur(10px);
-          background: rgba(10,20,26,.95);
-          border-bottom: 3px solid #c5a059;
-          box-shadow: 0 4px 20px rgba(0,0,0,.6);
+          backdrop-filter: blur(12px);
+          background: rgba(12,16,21,.96);
+          border-bottom: 3.5px solid #e5b80b;
+          box-shadow: 0 6px 25px rgba(0,0,0,.7);
         }
         .acocollo-fade-in {
           animation: acocolloFadeIn .28s ease both;
@@ -454,7 +454,7 @@ export default function Dashboard() {
         .acocollo-celda-heatmap:hover {
           transform: scale(1.35);
           transition: transform .12s ease;
-          box-shadow: 0 0 10px rgba(197,160,89,.9);
+          box-shadow: 0 0 12px rgba(229,184,11,1);
           z-index: 70;
         }
         .acocollo-celda-hoy {
@@ -465,13 +465,13 @@ export default function Dashboard() {
           position: absolute;
           inset: 0;
           border-radius: inherit;
-          border: 2px solid #c5a059;
-          animation: acocolloHoyPulso 1.5s ease-out infinite;
+          border: 2px solid #e5b80b;
+          animation: acocolloHoyPulso 1.4s ease-out infinite;
           pointer-events: none;
         }
         @keyframes acocolloHoyPulso {
           0%   { transform: scale(1); opacity: 1; }
-          100% { transform: scale(2); opacity: 0; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
         .acocollo-modo-transicion {
           animation: acocolloModoEntrada .35s cubic-bezier(.2,.85,.35,1.15) both;
@@ -503,14 +503,14 @@ export default function Dashboard() {
               style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e6ca65", textShadow: "0 0 15px rgba(197,160,89,.6)" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
               <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
-                <p style={{ color: "#e6ca65", fontSize: 11, marginTop: 0, fontWeight: 600 }}>
+                <p style={{ color: "#e5b80b", fontSize: 11, marginTop: 0, fontWeight: 700 }}>
                   Última sincronización: {tiempoRelativo(resumen.ultimaSync.toDate())}
                   {usuarioGoogle && <span style={{ marginLeft: 8, color: "#457b9d" }}>· {usuarioGoogle.email}</span>}
                 </p>
@@ -526,9 +526,9 @@ export default function Dashboard() {
                   fontWeight: 700,
                   padding: "14px 18px",
                   borderRadius: 14,
-                  border: "2px solid #c5a059",
-                  background: "#12222b",
-                  color: "#e6ca65",
+                  border: "2px solid #e5b80b",
+                  background: "#141c24",
+                  color: "#e5b80b",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -549,9 +549,9 @@ export default function Dashboard() {
                 fontWeight: 700,
                 padding: "14px 18px",
                 borderRadius: 14,
-                border: "2px solid #c5a059",
-                background: "#12222b",
-                color: exportandoGlobal ? "#a8dadc" : "#e6ca65",
+                border: "2px solid #e5b80b",
+                background: "#141c24",
+                color: exportandoGlobal ? "#a8dadc" : "#e5b80b",
                 cursor: exportandoGlobal || carpetas.length === 0 ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -571,9 +571,9 @@ export default function Dashboard() {
                 fontWeight: 700,
                 padding: "14px 20px",
                 borderRadius: 14,
-                border: modoPresentacion ? "2px solid #e6ca65" : "1.5px solid #457b9d",
-                background: modoPresentacion ? "#c5a05933" : "#12222b",
-                color: modoPresentacion ? "#e6ca65" : "#ffffff",
+                border: modoPresentacion ? "2.5px solid #e5b80b" : "1.5px solid #457b9d",
+                background: modoPresentacion ? "#e5b80b33" : "#141c24",
+                color: modoPresentacion ? "#e5b80b" : "#ffffff",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -593,11 +593,11 @@ export default function Dashboard() {
                   fontWeight: 800,
                   padding: "22px 42px",
                   borderRadius: 16,
-                  border: "2.5px solid #e6ca65",
-                  background: sincronizando ? "#12222b" : "linear-gradient(90deg,#c5a05944,#183a4844)",
-                  color: sincronizando ? "#a8dadc" : "#e6ca65",
+                  border: "2.5px solid #e5b80b",
+                  background: sincronizando ? "#141c24" : "linear-gradient(90deg,#e5b80b55,#1f2d3d55)",
+                  color: sincronizando ? "#a8dadc" : "#e5b80b",
                   cursor: sincronizando ? "not-allowed" : "pointer",
-                  boxShadow: sincronizando ? "none" : "0 0 30px rgba(197,160,89,.5)",
+                  boxShadow: sincronizando ? "none" : "0 0 35px rgba(229,184,11,.6)",
                   letterSpacing: 0.3,
                 }}
               >
@@ -608,7 +608,7 @@ export default function Dashboard() {
                   style={{
                     fontSize: 11,
                     marginTop: 6,
-                    color: mensajeSync.tipo === "ok" ? "#e6ca65" : "#e76f51",
+                    color: mensajeSync.tipo === "ok" ? "#e5b80b" : "#e76f51",
                   }}
                 >
                   {mensajeSync.texto}
@@ -625,17 +625,18 @@ export default function Dashboard() {
         <div
           style={{
             marginBottom: 20,
-            background: "#12222b",
+            background: "#141c24",
             borderRadius: 12,
             padding: "16px 18px",
-            border: "1.5px solid #c5a05955",
+            border: "2px solid #e5b80b66",
+            boxShadow: "0 4px 20px rgba(229,184,11,.15)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
-              <span style={{ color: "#e6ca65" }}>»» </span>AVANCE POR CARPETAS
+              <span style={{ color: "#e5b80b" }}>»» </span>AVANCE POR CARPETAS
             </span>
-            <strong style={{ fontSize: 30, color: "#e6ca65", textShadow: "0 0 18px rgba(197,160,89,.7)" }}>{pct}%</strong>
+            <strong style={{ fontSize: 30, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>{pct}%</strong>
           </div>
           <div style={{ fontSize: 11, color: "#a8dadc", marginBottom: 8 }}>
             {resumen?.completas ?? "–"} de {resumen?.totalFinales ?? "–"} carpetas marcadas como completas
@@ -643,10 +644,10 @@ export default function Dashboard() {
           <div
             style={{
               height: 34,
-              background: "#0a141a",
+              background: "#0c1015",
               borderRadius: 17,
               overflow: "hidden",
-              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #c5a05955",
+              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #e5b80b66",
             }}
           >
             <div
@@ -655,10 +656,10 @@ export default function Dashboard() {
                 width: `${pct}%`,
                 height: "100%",
                 backgroundImage:
-                  "repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0px, rgba(255,255,255,.2) 9px, transparent 9px, transparent 18px), linear-gradient(90deg,#c5a059,#e6ca65)",
+                  "repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0px, rgba(255,255,255,.2) 9px, transparent 9px, transparent 18px), linear-gradient(90deg,#e5b80b,#e67e22)",
                 backgroundSize: "36px 36px, 100% 100%",
                 transition: "width .4s ease",
-                boxShadow: "0 0 22px rgba(197,160,89,.7)",
+                boxShadow: "0 0 25px rgba(229,184,11,.8)",
                 borderRadius: 17,
               }}
             />
@@ -669,17 +670,18 @@ export default function Dashboard() {
         <div
           style={{
             marginBottom: 32,
-            background: "#12222b",
+            background: "#141c24",
             borderRadius: 12,
             padding: "16px 18px",
-            border: "1.5px solid #c5a05955",
+            border: "2px solid #e5b80b66",
+            boxShadow: "0 4px 20px rgba(229,184,11,.15)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
-              <span style={{ color: "#e6ca65" }}>»» </span>AVANCE POR ARCHIVOS <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>(más preciso)</span>
+              <span style={{ color: "#e5b80b" }}>»» </span>AVANCE POR ARCHIVOS <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>(más preciso)</span>
             </span>
-            <strong style={{ fontSize: 30, color: "#e6ca65", textShadow: "0 0 18px rgba(197,160,89,.7)" }}>
+            <strong style={{ fontSize: 30, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
               {resumen?.pctArchivos ?? "–"}%
             </strong>
           </div>
@@ -689,19 +691,19 @@ export default function Dashboard() {
           <div
             style={{
               height: 22,
-              background: "#0a141a",
+              background: "#0c1015",
               borderRadius: 11,
               overflow: "hidden",
-              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #c5a05955",
+              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #e5b80b66",
             }}
           >
             <div
               style={{
                 width: `${resumen?.pctArchivos ?? 0}%`,
                 height: "100%",
-                background: "linear-gradient(90deg,#c5a059,#e6ca65)",
+                background: "linear-gradient(90deg,#e5b80b,#e67e22)",
                 transition: "width .4s ease",
-                boxShadow: "0 0 16px rgba(197,160,89,.6)",
+                boxShadow: "0 0 18px rgba(229,184,11,.7)",
                 borderRadius: 11,
               }}
             />
@@ -711,9 +713,9 @@ export default function Dashboard() {
         {/* Contadores con desglose */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 32 }}>
           <Card label="Carpetas finales" value={resumen?.totalFinales ?? "–"} color="#457b9d" grande={modoPresentacion} />
-          <Card label="Completas" value={resumen?.completas ?? "–"} color="#e6ca65" grande={modoPresentacion} />
-          <Card label="Incompletas" value={resumen?.incompletas ?? "–"} color="#f4a261" grande={modoPresentacion} />
-          <Card label="Vacías" value={resumen?.vacias ?? "–"} color="#e76f51" grande={modoPresentacion} />
+          <Card label="Completas" value={resumen?.completas ?? "–"} color="#e5b80b" grande={modoPresentacion} />
+          <Card label="Incompletas" value={resumen?.incompletas ?? "–"} color="#e67e22" grande={modoPresentacion} />
+          <Card label="Vacías" value={resumen?.vacias ?? "–"} color="#c0392b" grande={modoPresentacion} />
         </div>
 
         {/* Selector de Rango de Fechas para Actividad/Heatmap */}
@@ -734,9 +736,9 @@ export default function Dashboard() {
                   fontSize: 11,
                   padding: "5px 12px",
                   borderRadius: 16,
-                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#e6ca65" : "#457b9d"}`,
-                  background: rangoDiasHeatmap === btn.val ? "#c5a05933" : "#12222b",
-                  color: rangoDiasHeatmap === btn.val ? "#e6ca65" : "#a8dadc",
+                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#e5b80b" : "#457b9d"}`,
+                  background: rangoDiasHeatmap === btn.val ? "#e5b80b33" : "#141c24",
+                  color: rangoDiasHeatmap === btn.val ? "#e5b80b" : "#a8dadc",
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -791,7 +793,7 @@ export default function Dashboard() {
         {modoPresentacion && areas.length > 0 && (
           <div className="acocollo-fade-in acocollo-modo-transicion" style={{ marginTop: 36 }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#e6ca65" }}>»» </span>AVANCE POR ESPECIALIDAD, POR ÁREA
+              <span style={{ color: "#e5b80b" }}>»» </span>AVANCE POR ESPECIALIDAD, POR ÁREA
             </div>
             {areas.map((a) => {
               const especialidadesDelArea = especialidadPorArea[a] || {};
@@ -813,7 +815,7 @@ export default function Dashboard() {
                       display: "flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#12222b",
+                      background: "#141c24",
                       borderRadius: 8,
                       borderBottom: `2.5px solid ${colorForArea(a)}`,
                     }}
@@ -876,9 +878,9 @@ export default function Dashboard() {
               style={{
                 width: "100%",
                 boxSizing: "border-box",
-                background: "#12222b",
+                background: "#141c24",
                 color: "#ffffff",
-                border: "1px solid #457b9d",
+                border: "1.5px solid #457b9d",
                 borderRadius: 8,
                 padding: "9px 12px",
                 fontSize: 13,
@@ -897,8 +899,8 @@ export default function Dashboard() {
                       fontSize: 11,
                       padding: "6px 12px",
                       borderRadius: "20px 0 0 20px",
-                      border: "1px solid #457b9d",
-                      background: "#12222b",
+                      border: "1.5px solid #457b9d",
+                      background: "#141c24",
                       color: exportandoArea === a ? "#a8dadc" : "#ffffff",
                       fontWeight: 600,
                       cursor: exportandoArea === a ? "not-allowed" : "pointer",
@@ -914,10 +916,10 @@ export default function Dashboard() {
                       fontSize: 11,
                       padding: "6px 12px",
                       borderRadius: "0 20px 20px 0",
-                      border: "1px solid #457b9d",
+                      border: "1.5px solid #457b9d",
                       borderLeft: "none",
-                      background: "#12222b",
-                      color: exportandoExcelArea === a ? "#a8dadc" : "#e6ca65",
+                      background: "#141c24",
+                      color: exportandoExcelArea === a ? "#a8dadc" : "#e5b80b",
                       fontWeight: 600,
                       cursor: exportandoExcelArea === a ? "not-allowed" : "pointer",
                     }}
@@ -941,7 +943,7 @@ export default function Dashboard() {
                 area="Todas"
                 pct={resumen?.pctArchivos ?? 0}
                 total={resumen?.totalFinales ?? 0}
-                color="#e6ca65"
+                color="#e5b80b"
                 active={filtroArea === "Todas"}
                 onClick={() => setFiltroArea("Todas")}
               />
@@ -991,10 +993,11 @@ export default function Dashboard() {
               key={`${filtroEstado}-${filtroArea}-${busqueda}`}
               className="acocollo-fade-in"
               style={{
-                background: "#0a141a",
+                background: "#0c1015",
                 borderRadius: 12,
                 overflow: "hidden",
-                border: "1.5px solid #c5a05955",
+                border: "2px solid #e5b80b66",
+                boxShadow: "0 6px 24px rgba(0,0,0,.6)",
               }}
             >
               {visibles.length === 0 && (
@@ -1045,10 +1048,10 @@ export default function Dashboard() {
                         onClick={() => toggleGrupo(key)}
                         style={{
                           padding: "12px 16px 12px 14px",
-                          background: "#12222b",
-                          borderLeft: `5px solid ${vaciasGrupo > 0 ? "#e76f51" : tienePendientes ? "#f4a261" : "#e6ca65"}`,
-                          borderTop: "1px solid #c5a05933",
-                          borderBottom: "1px solid #0a141a",
+                          background: "#141c24",
+                          borderLeft: `5px solid ${vaciasGrupo > 0 ? "#c0392b" : tienePendientes ? "#e67e22" : "#e5b80b"}`,
+                          borderTop: "1px solid #e5b80b44",
+                          borderBottom: "1px solid #0c1015",
                           display: "flex",
                           alignItems: "baseline",
                           gap: 8,
@@ -1062,7 +1065,7 @@ export default function Dashboard() {
                         <span style={{ fontSize: 11.5, fontWeight: 800, color: "#a8dadc", textTransform: "uppercase", letterSpacing: 0.5 }}>
                           {g.area}
                         </span>
-                        <span style={{ color: "#e6ca65", fontSize: 12 }}>›</span>
+                        <span style={{ color: "#e5b80b", fontSize: 12 }}>›</span>
                         <span style={{ fontSize: 14.5, fontWeight: 800, color: "#ffffff", textShadow: "0 1px 2px rgba(0,0,0,.5)" }}>{g.especialidad}</span>
                         <span style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
                           <MiniDona completas={g.items.length - pendientesGrupo} total={g.items.length} />
@@ -1072,8 +1075,8 @@ export default function Dashboard() {
                                 fontSize: 10.5,
                                 padding: "2px 9px",
                                 borderRadius: 20,
-                                background: (vaciasGrupo > 0 ? "#e76f51" : "#f4a261") + "33",
-                                color: vaciasGrupo > 0 ? "#ff6b6b" : "#f4a261",
+                                background: (vaciasGrupo > 0 ? "#c0392b" : "#e67e22") + "33",
+                                color: vaciasGrupo > 0 ? "#ff6b6b" : "#e67e22",
                                 fontWeight: 700,
                               }}
                             >
@@ -1094,10 +1097,10 @@ export default function Dashboard() {
                             onClick={() => window.open(driveUrl, "_blank", "noopener,noreferrer")}
                             style={{
                               padding: "10px 16px 10px 24px",
-                              borderBottom: "1px solid #142834",
+                              borderBottom: "1px solid #1a2533",
                               cursor: "pointer",
                             }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#142834")}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#1b2736")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                           >
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -1107,8 +1110,8 @@ export default function Dashboard() {
                                   fontSize: 10,
                                   padding: "2px 8px",
                                   borderRadius: 20,
-                                  background: (ESTADO_COLOR[c.estado] || "#e6ca65") + "33",
-                                  color: ESTADO_COLOR[c.estado] || "#e6ca65",
+                                  background: (ESTADO_COLOR[c.estado] || "#e5b80b") + "33",
+                                  color: ESTADO_COLOR[c.estado] || "#e5b80b",
                                   textTransform: "uppercase",
                                   fontWeight: 700,
                                   whiteSpace: "nowrap",
@@ -1123,14 +1126,14 @@ export default function Dashboard() {
                                 style={{
                                   marginTop: 6,
                                   padding: "6px 10px",
-                                  background: "#c5a0591c",
-                                  border: "1px solid #c5a05944",
+                                  background: "#e5b80b1c",
+                                  border: "1.5px solid #e5b80b55",
                                   borderRadius: 8,
                                   fontSize: 11,
                                   color: "#a8dadc",
                                 }}
                               >
-                                ✓ Marcada por <strong style={{ color: "#e6ca65" }}>{c.marcadoPor || "alguien"}</strong>
+                                ✓ Marcada por <strong style={{ color: "#e5b80b" }}>{c.marcadoPor || "alguien"}</strong>
                               </div>
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
@@ -1145,7 +1148,7 @@ export default function Dashboard() {
                                   fontSize: 10,
                                   padding: "3px 9px",
                                   borderRadius: 20,
-                                  border: c.forzada ? "1px solid #e76f5188" : "1px solid #c5a05988",
+                                  border: c.forzada ? "1.5px solid #c0392b88" : "1.5px solid #e5b80b88",
                                   background: "transparent",
                                   color: marcandoId === c.id ? "#457b9d" : c.forzada ? "#a8dadc" : "#ffffff",
                                   cursor: marcandoId === c.id ? "not-allowed" : "pointer",
@@ -1170,18 +1173,19 @@ export default function Dashboard() {
             <h2 style={{ fontSize: 16, color: "#ffffff", marginBottom: 8 }}>Actividad reciente</h2>
             <div
               style={{
-                background: "#0a141a",
+                background: "#0c1015",
                 borderRadius: 12,
                 maxHeight: 480,
                 overflowY: "auto",
-                border: "1.5px solid #c5a05955",
+                border: "2px solid #e5b80b66",
+                boxShadow: "0 6px 24px rgba(0,0,0,.6)",
               }}
             >
               {eventos.length === 0 && (
                 <p style={{ padding: 16, color: "#a8dadc" }}>Sin eventos todavía.</p>
               )}
               {eventos.map((e) => {
-                const color = EVENTO_COLOR[e.tipo] || "#e6ca65";
+                const color = EVENTO_COLOR[e.tipo] || "#e5b80b";
                 const icono = EVENTO_ICONO[e.tipo] || "•";
                 const fecha = e.timestamp?.toDate ? e.timestamp.toDate() : null;
                 return (
@@ -1191,7 +1195,7 @@ export default function Dashboard() {
                       display: "flex",
                       gap: 10,
                       padding: "10px 14px",
-                      borderBottom: "1px solid #142834",
+                      borderBottom: "1px solid #1a2533",
                     }}
                   >
                     <div
@@ -1237,8 +1241,8 @@ export default function Dashboard() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10,18,22,.85)",
-            backdropFilter: "blur(3px)",
+            background: "rgba(12,16,21,.88)",
+            backdropFilter: "blur(4px)",
             zIndex: 100,
             display: "flex",
             alignItems: "center",
@@ -1250,14 +1254,14 @@ export default function Dashboard() {
             onClick={(e) => e.stopPropagation()}
             className="acocollo-fade-in"
             style={{
-              background: "#12222b",
-              border: "2px solid #c5a059",
+              background: "#141c24",
+              border: "2.5px solid #e5b80b",
               borderRadius: 16,
               width: "min(1100px, 100%)",
               maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 20px 60px rgba(0,0,0,.7)",
+              boxShadow: "0 20px 60px rgba(0,0,0,.8)",
             }}
           >
             <div
@@ -1266,7 +1270,7 @@ export default function Dashboard() {
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "20px 26px",
-                borderBottom: "1.5px solid #c5a05955",
+                borderBottom: "1.5px solid #e5b80b66",
               }}
             >
               <div style={{ fontSize: 19, fontWeight: 700, color: "#ffffff" }}>
@@ -1278,7 +1282,7 @@ export default function Dashboard() {
                   fontSize: 14,
                   padding: "7px 14px",
                   borderRadius: 8,
-                  border: "1px solid #457b9d",
+                  border: "1.5px solid #457b9d",
                   background: "transparent",
                   color: "#a8dadc",
                   cursor: "pointer",
@@ -1299,8 +1303,8 @@ export default function Dashboard() {
                     style={{
                       padding: "16px 18px",
                       marginBottom: 12,
-                      background: "#0a141a",
-                      border: "1.5px solid #c5a05955",
+                      background: "#0c1015",
+                      border: "1.5px solid #e5b80b66",
                       borderRadius: 10,
                     }}
                   >
@@ -1317,7 +1321,7 @@ export default function Dashboard() {
                           fontSize: 12,
                           padding: "5px 12px",
                           borderRadius: 20,
-                          border: "1px solid #e76f5188",
+                          border: "1.5px solid #c0392b88",
                           background: "transparent",
                           color: marcandoId === c.id ? "#457b9d" : "#a8dadc",
                           cursor: marcandoId === c.id ? "not-allowed" : "pointer",
@@ -1359,7 +1363,7 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
               }}
             >
               {p}
-              {esUltimo && <span style={{ color: "#e6ca65", marginLeft: 4 }}>↗</span>}
+              {esUltimo && <span style={{ color: "#e5b80b", marginLeft: 4 }}>↗</span>}
             </span>
           </span>
         );
@@ -1374,7 +1378,7 @@ function EspecialidadMiniCard({ nombre, pct, total, incompletas = 0, vacias = 0,
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (pct / 100) * circumference;
-  const color = pct >= 100 ? "#e6ca65" : pct >= 50 ? "#f4a261" : "#e76f51";
+  const color = pct >= 100 ? "#e5b80b" : pct >= 50 ? "#e67e22" : "#c0392b";
 
   return (
     <div
@@ -1386,13 +1390,14 @@ function EspecialidadMiniCard({ nombre, pct, total, incompletas = 0, vacias = 0,
         gap: 8,
         padding: "18px 12px",
         borderRadius: 12,
-        background: "#12222b",
-        border: "1.5px solid #c5a05955",
+        background: "#141c24",
+        border: "1.5px solid #e5b80b66",
         animationDelay: `${delay}ms`,
+        boxShadow: "0 4px 16px rgba(0,0,0,.4)",
       }}
     >
       <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0a141a" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0c1015" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -1414,8 +1419,8 @@ function EspecialidadMiniCard({ nombre, pct, total, incompletas = 0, vacias = 0,
       </div>
       <div style={{ fontSize: 12, color: "#a8dadc", fontWeight: 700 }}>{total} carpetas</div>
       <div style={{ fontSize: 13, textAlign: "center", display: "flex", gap: 10, marginTop: 4 }}>
-        <span style={{ color: "#f4a261", fontWeight: 700 }}>{incompletas} inc.</span>
-        <span style={{ color: "#e76f51", fontWeight: 700 }}>{vacias} vacías</span>
+        <span style={{ color: "#e67e22", fontWeight: 700 }}>{incompletas} inc.</span>
+        <span style={{ color: "#c0392b", fontWeight: 700 }}>{vacias} vacías</span>
       </div>
     </div>
   );
@@ -1441,15 +1446,16 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
         gap: Math.round(size * 0.05),
         padding: "18px 14px",
         borderRadius: 14,
-        border: `2px solid ${active ? color : "#c5a05955"}`,
-        background: active ? color + "22" : "#12222b",
+        border: `2.5px solid ${active ? color : "#e5b80b66"}`,
+        background: active ? color + "25" : "#141c24",
         cursor: "pointer",
         transition: "all .15s ease",
         width: tamano ? "100%" : "auto",
+        boxShadow: active ? `0 0 20px ${color}66` : "0 4px 14px rgba(0,0,0,.3)",
       }}
     >
       <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0a141a" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0c1015" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -1472,8 +1478,8 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
       <div style={{ fontSize: fontCount, color: "#a8dadc", fontWeight: 700 }}>{total} carpetas</div>
       {tamano && (
         <div style={{ fontSize: 14, textAlign: "center", display: "flex", gap: 12, marginTop: 6 }}>
-          <span style={{ color: "#f4a261", fontWeight: 700 }}>{incompletas} inc.</span>
-          <span style={{ color: "#e76f51", fontWeight: 700 }}>{vacias} vacías</span>
+          <span style={{ color: "#e67e22", fontWeight: 700 }}>{incompletas} inc.</span>
+          <span style={{ color: "#c0392b", fontWeight: 700 }}>{vacias} vacías</span>
         </div>
       )}
     </button>
@@ -1483,20 +1489,20 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
 /* PANEL DE DATOS DE CARPETA MADRE / ÁREA */
 function AreaProgressPanel({ area, stats, color }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#12222b", border: `2px solid #c5a059`, borderRadius: 12, padding: "18px 22px", marginBottom: 14, boxShadow: `0 4px 16px rgba(0,0,0,.4)` }}>
-      <div style={{ fontSize: 16, fontWeight: 800, color: "#e6ca65", textTransform: "uppercase", letterSpacing: 0.5 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#141c24", border: `2.5px solid #e5b80b`, borderRadius: 12, padding: "18px 22px", marginBottom: 14, boxShadow: `0 4px 20px rgba(229,184,11,.2)` }}>
+      <div style={{ fontSize: 16, fontWeight: 800, color: "#e5b80b", textTransform: "uppercase", letterSpacing: 0.5 }}>
         {area}
       </div>
       <div style={{ fontSize: 20, fontWeight: 700, color: "#ffffff", lineHeight: 1.3 }}>
-        <span style={{ color: "#e6ca65", fontWeight: 800 }}>{stats.completas}</span> completas de <strong style={{ color: "#ffffff" }}>{stats.total}</strong> carpetas
+        <span style={{ color: "#e5b80b", fontWeight: 800 }}>{stats.completas}</span> completas de <strong style={{ color: "#ffffff" }}>{stats.total}</strong> carpetas
       </div>
       <div style={{ fontSize: 15, fontWeight: 600, color: "#a8dadc", display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
         <span>
-          <strong style={{ color: "#f4a261", fontWeight: 700, fontSize: 17 }}>{stats.incompletas}</strong> incompletas
+          <strong style={{ color: "#e67e22", fontWeight: 700, fontSize: 17 }}>{stats.incompletas}</strong> incompletas
         </span>
         <span>·</span>
         <span>
-          <strong style={{ color: "#e76f51", fontWeight: 700, fontSize: 17 }}>{stats.vacias}</strong> vacías
+          <strong style={{ color: "#c0392b", fontWeight: 700, fontSize: 17 }}>{stats.vacias}</strong> vacías
         </span>
       </div>
     </div>
@@ -1510,11 +1516,11 @@ function MiniDona({ completas, total }) {
   const circumference = 2 * Math.PI * radius;
   const pct = total > 0 ? completas / total : 0;
   const offset = circumference - pct * circumference;
-  const color = pct >= 1 ? "#e6ca65" : pct > 0 ? "#f4a261" : "#e76f51";
+  const color = pct >= 1 ? "#e5b80b" : pct > 0 ? "#e67e22" : "#c0392b";
 
   return (
     <svg width={size} height={size}>
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0a141a" strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#0c1015" strokeWidth={stroke} />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -1537,11 +1543,11 @@ function chipStyle(active, color) {
     padding: "8px 16px",
     borderRadius: 24,
     border: `1.5px solid ${active ? color : "#457b9d"}`,
-    background: active ? color + "33" : "#12222b",
+    background: active ? color + "33" : "#141c24",
     color: active ? color : "#a8dadc",
     fontWeight: 600,
     cursor: "pointer",
-    boxShadow: active ? `0 0 10px ${color}55` : "none",
+    boxShadow: active ? `0 0 12px ${color}66` : "none",
   };
 }
 
@@ -1587,15 +1593,15 @@ function Card({ label, value, color, grande }) {
     <div
       className="acocollo-tarjeta-viva"
       style={{
-        background: "#12222b",
+        background: "#141c24",
         borderRadius: 12,
         padding: grande ? "26px" : "18px",
-        border: `1px solid ${color}44`,
-        borderTop: `3.5px solid ${color}`,
-        boxShadow: `0 0 20px ${color}22`,
+        border: `1.5px solid ${color}55`,
+        borderTop: `4px solid ${color}`,
+        boxShadow: `0 0 22px ${color}33`,
       }}
     >
-      <div style={{ fontSize: grande ? 44 : 28, fontWeight: 700, color: "#ffffff", textShadow: `0 0 14px ${color}55` }}>{valorAnimado}</div>
+      <div style={{ fontSize: grande ? 44 : 28, fontWeight: 700, color: "#ffffff", textShadow: `0 0 14px ${color}66` }}>{valorAnimado}</div>
       <div style={{ fontSize: grande ? 15 : 12, color: "#a8dadc", letterSpacing: 0.3 }}>{label}</div>
     </div>
   );
@@ -1616,10 +1622,11 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
   return (
     <div
       style={{
-        background: "#12222b",
-        border: "1.5px solid #c5a05955",
+        background: "#141c24",
+        border: "2px solid #e5b80b66",
         borderRadius: 12,
         padding: grande ? "28px 32px" : "16px 18px",
+        boxShadow: "0 4px 20px rgba(0,0,0,.5)",
       }}
     >
       <div style={{ fontSize: grande ? 20 : 15, fontWeight: 700, color: "#ffffff", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1651,13 +1658,13 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
           const pasoEtiqueta = 1;
 
           return (
-            <div style={{ overflowX: "auto", overflowY: "hidden", width: "100%", paddingBottom: 8, scrollbarWidth: "thin", scrollbarColor: "#457b9d #12222b" }}>
+            <div style={{ overflowX: "auto", overflowY: "hidden", width: "100%", paddingBottom: 8, scrollbarWidth: "thin", scrollbarColor: "#457b9d #141c24" }}>
               <svg viewBox={`0 0 ${ancho} ${alto}`} style={{ width: `${ancho}px`, height: `${alto}px`, display: "block" }}>
                 {[0, 25, 50, 75, 100].map((v) => {
                   const y = paddingArriba + altoLinea - paddingArriba - (v / 100) * (altoLinea - paddingArriba * 2);
                   return (
                     <g key={v}>
-                      <line x1={paddingIzq - 10} y1={y} x2={ancho - paddingDer} y2={y} stroke="#c5a05933" strokeWidth="1" strokeDasharray="3,4" />
+                      <line x1={paddingIzq - 10} y1={y} x2={ancho - paddingDer} y2={y} stroke="#e5b80b33" strokeWidth="1" strokeDasharray="3,4" />
                       <text x={paddingIzq - 16} y={y + 4} textAnchor="end" fontSize={grande ? 14 : 12} fill="#a8dadc" fontWeight="600">
                         {v}%
                       </text>
@@ -1665,31 +1672,31 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
                   );
                 })}
 
-                <path d={pathArea} fill="url(#tendenciaGradientGold)" opacity="0.4" />
+                <path d={pathArea} fill="url(#tendenciaGradientGold)" opacity="0.45" />
                 <path
                   d={pathLinea}
                   fill="none"
-                  stroke="#e6ca65"
+                  stroke="#e5b80b"
                   strokeWidth={grande ? "4.5" : "3.5"}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
                 {puntos.map((p, i) => (
-                  <circle key={i} cx={p.x} cy={p.y} r={i === puntos.length - 1 ? (grande ? 7 : 5.5) : (grande ? 5 : 3.5)} fill="#e6ca65" />
+                  <circle key={i} cx={p.x} cy={p.y} r={i === puntos.length - 1 ? (grande ? 7 : 5.5) : (grande ? 5 : 3.5)} fill="#e5b80b" />
                 ))}
 
                 <defs>
                   <linearGradient id="tendenciaGradientGold" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#c5a059" />
-                    <stop offset="100%" stopColor="#12222b" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#e5b80b" />
+                    <stop offset="100%" stopColor="#141c24" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
-                <text x={puntos[puntos.length - 1].x} y={puntos[puntos.length - 1].y - 14} textAnchor="end" fontSize={grande ? 18 : 15} fontWeight="700" fill="#e6ca65">
+                <text x={puntos[puntos.length - 1].x} y={puntos[puntos.length - 1].y - 14} textAnchor="end" fontSize={grande ? 18 : 15} fontWeight="700" fill="#e5b80b">
                   {puntos[puntos.length - 1].pct}%
                 </text>
 
-                <line x1={paddingIzq - 10} y1={altoLinea + 8} x2={ancho - paddingDer} y2={altoLinea + 8} stroke="#c5a05944" strokeWidth="1" />
+                <line x1={paddingIzq - 10} y1={altoLinea + 8} x2={ancho - paddingDer} y2={altoLinea + 8} stroke="#e5b80b44" strokeWidth="1" />
                 <text x={paddingIzq} y={altoLinea + 18} fontSize={grande ? 12 : 11} fill="#a8dadc" fontWeight="700">
                   INCIDENCIAS DEL DRIVE POR DÍA
                 </text>
@@ -1703,7 +1710,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
                       width="8"
                       height={alturaBarrita}
                       rx="2"
-                      fill={p.incidencias > 0 ? "#e6ca65" : "#457b9d66"}
+                      fill={p.incidencias > 0 ? "#e5b80b" : "#457b9d66"}
                     />
                   );
                 })}
@@ -1774,10 +1781,10 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
   }
 
   function intensidad(count) {
-    if (count === 0) return "#0a141a";
-    if (count >= 11) return "#e6ca65";
-    if (count >= 4) return "#457b9d";
-    return "#f4a261";
+    if (count === 0) return "#0c1015";
+    if (count >= 11) return "#e5b80b";
+    if (count >= 4) return "#e67e22";
+    return "#c0392b";
   }
 
   const semanas = [];
@@ -1816,11 +1823,12 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
   return (
     <div
       style={{
-        background: "#12222b",
-        border: "1.5px solid #c5a05955",
+        background: "#141c24",
+        border: "2px solid #e5b80b66",
         borderRadius: 12,
         padding: grande ? "22px 26px" : "16px 18px",
         overflowX: "auto",
+        boxShadow: "0 4px 20px rgba(0,0,0,.5)",
       }}
     >
       <div style={{ fontSize: grande ? 18 : 14, fontWeight: 700, color: "#ffffff", marginBottom: grande ? 18 : 10 }}>
@@ -1868,9 +1876,9 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                       width: 28,
                       height: 28,
                       borderRadius: "50%",
-                      background: (EVENTO_COLOR[tipo] || "#e6ca65") + "33",
-                      border: `1.5px solid ${EVENTO_COLOR[tipo] || "#e6ca65"}`,
-                      color: EVENTO_COLOR[tipo] || "#e6ca65",
+                      background: (EVENTO_COLOR[tipo] || "#e5b80b") + "33",
+                      border: `1.5px solid ${EVENTO_COLOR[tipo] || "#e5b80b"}`,
+                      color: EVENTO_COLOR[tipo] || "#e5b80b",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -1897,8 +1905,8 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
             left: tooltipPos ? tooltipPos.left : tooltip.anclaX,
             top: tooltipPos ? tooltipPos.top : tooltip.anclaY,
             visibility: tooltipPos ? "visible" : "hidden",
-            background: "#12222b",
-            border: "1.5px solid #c5a059",
+            background: "#141c24",
+            border: "2px solid #e5b80b",
             color: "#ffffff",
             padding: "8px 12px",
             borderRadius: 7,
@@ -1919,7 +1927,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10,18,22,.85)",
+            background: "rgba(12,16,21,.88)",
             backdropFilter: "blur(4px)",
             zIndex: 150,
             display: "flex",
@@ -1932,14 +1940,14 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
             onClick={(e) => e.stopPropagation()}
             className="acocollo-fade-in"
             style={{
-              background: "#12222b",
-              border: "2px solid #c5a059",
+              background: "#141c24",
+              border: "2.5px solid #e5b80b",
               borderRadius: 16,
               width: "min(750px, 100%)",
               maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 20px 60px rgba(0,0,0,.7)",
+              boxShadow: "0 20px 60px rgba(0,0,0,.8)",
             }}
           >
             <div
@@ -1948,7 +1956,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "20px 26px",
-                borderBottom: "1.5px solid #c5a05955",
+                borderBottom: "1.5px solid #e5b80b66",
               }}
             >
               <div>
@@ -1965,7 +1973,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                   fontSize: 14,
                   padding: "7px 14px",
                   borderRadius: 8,
-                  border: "1px solid #457b9d",
+                  border: "1.5px solid #457b9d",
                   background: "transparent",
                   color: "#a8dadc",
                   cursor: "pointer",
@@ -1986,7 +1994,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {eventosDelDia.map((ev) => {
-                    const color = EVENTO_COLOR[ev.tipo] || "#e6ca65";
+                    const color = EVENTO_COLOR[ev.tipo] || "#e5b80b";
                     const icono = EVENTO_ICONO[ev.tipo] || "•";
                     const fechaEv = ev.timestamp?.toDate ? ev.timestamp.toDate() : null;
                     const horaStr = fechaEv ? fechaEv.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
@@ -1994,8 +2002,8 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                       <div
                         key={ev.id}
                         style={{
-                          background: "#0a141a",
-                          border: "1.5px solid #c5a05955",
+                          background: "#0c1015",
+                          border: "1.5px solid #e5b80b66",
                           borderRadius: 10,
                           padding: "12px 16px",
                           display: "flex",
@@ -2023,14 +2031,14 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 14, color: "#ffffff" }}>
-                            <strong>{ev.usuario || "Usuario"}</strong> <span style={{ color }}>{EVENTO_LABEL[ev.tipo] || ev.tipo}</span> <strong style={{ color: "#e6ca65" }}>{ev.item}</strong>
+                            <strong>{ev.usuario || "Usuario"}</strong> <span style={{ color }}>{EVENTO_LABEL[ev.tipo] || ev.tipo}</span> <strong style={{ color: "#e5b80b" }}>{ev.item}</strong>
                           </div>
                           {ev.ruta && (
                             <div style={{ fontSize: 12, color: "#a8dadc", marginTop: 3, wordBreak: "break-all" }}>
                               📁 {ev.ruta}
                             </div>
                           )}
-                          <div style={{ fontSize: 11, color: "#e6ca65", marginTop: 6, display: "flex", justifyContent: "space-between" }}>
+                          <div style={{ fontSize: 11, color: "#e5b80b", marginTop: 6, display: "flex", justifyContent: "space-between" }}>
                             <span>{ev.tipo}</span>
                             <span>{horaStr}</span>
                           </div>
