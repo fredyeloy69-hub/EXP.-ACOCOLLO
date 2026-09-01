@@ -127,13 +127,14 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
+  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
-  const [exportandoVistaPdf, setExportandoVistaPdf] = useState(false);
-  const [exportandoVistaExcel, setExportandoVistaExcel] = useState(false);
+  const [exportandoArea, setExportandoArea] = useState(null);
+  const [exportandoExcelArea, setExportandoExcelArea] = useState(null);
   const [exportandoGlobal, setExportandoGlobal] = useState(false);
   const [modoPresentacion, setModoPresentacion] = useState(false);
   const [historial, setHistorial] = useState([]);
@@ -167,6 +168,62 @@ export default function Dashboard() {
 
   function toggleGrupo(key) {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
+  function filtrarCarpetasParaExportar(listaCarpetas) {
+    if (tipoExportacion === "incompletas") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta");
+    }
+    if (tipoExportacion === "vacias") {
+      return listaCarpetas.filter((c) => c.estado === "vacia");
+    }
+    if (tipoExportacion === "incompletas_vacias") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
+    }
+    return listaCarpetas; // "todas"
+  }
+
+  function handleExportarArea(areaNombre, carpetasDelArea) {
+    setExportandoArea(areaNombre);
+    try {
+      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
+    } finally {
+      setExportandoArea(null);
+    }
+  }
+
+  async function handleExportarGlobal() {
+    setExportandoGlobal(true);
+    try {
+      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
+    } catch (err) {
+      alert(`No se pudo generar el reporte consolidado: ${err.message}`);
+    } finally {
+      setExportandoGlobal(false);
+    }
+  }
+
+  async function handleExportarExcelArea(areaNombre, carpetasDelArea) {
+    setExportandoExcelArea(areaNombre);
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
+      );
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      await Promise.race([
+        generarReporteExcelPorArea(areaNombre, listaFiltrada),
+        timeoutPromise,
+      ]);
+    } catch (err) {
+      alert(`No se pudo generar el Excel: ${err.message}`);
+    } finally {
+      setExportandoExcelArea(null);
+    }
   }
 
   async function handleMarcarCompleta(folderId, forzada, folderName, folderRuta) {
@@ -227,24 +284,6 @@ export default function Dashboard() {
     }
   }
 
-  async function handleExportarGlobalPorEstado(estadoFiltro) {
-    setExportandoGlobal(true);
-    try {
-      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      let carpetasConsolidado = carpetas;
-      if (estadoFiltro === "pendientes") {
-        carpetasConsolidado = carpetas.filter((c) => c.estado !== "completa");
-      } else if (estadoFiltro !== "todas") {
-        carpetasConsolidado = carpetas.filter((c) => c.estado === estadoFiltro);
-      }
-      await generarReporteConsolidadoGlobal("Reporte Consolidado del Proyecto - C.S. ACOCOLLO I-2", carpetasConsolidado, { usuarioFirma });
-    } catch (err) {
-      alert(`No se pudo generar el consolidado: ${err.message}`);
-    } finally {
-      setExportandoGlobal(false);
-    }
-  }
-
   useEffect(() => {
     const unsubResumen = onSnapshot(doc(db, "_meta", "resumen"), (snap) => {
       if (snap.exists()) setResumen(snap.data());
@@ -282,6 +321,13 @@ export default function Dashboard() {
     : 0;
 
   const areas = Array.from(new Set(carpetas.map((c) => c.area || "Sin área"))).sort();
+
+  const carpetasPorArea = {};
+  for (const c of carpetas) {
+    const a = c.area || "Sin área";
+    if (!carpetasPorArea[a]) carpetasPorArea[a] = [];
+    carpetasPorArea[a].push(c);
+  }
 
   const carpetasForzadas = carpetas
     .filter((c) => c.forzada)
@@ -334,34 +380,6 @@ export default function Dashboard() {
     visibles = visibles.filter((c) =>
       (c.nombre || "").toLowerCase().includes(q) || (c.ruta || "").toLowerCase().includes(q)
     );
-  }
-
-  function handleExportarVistaPdf() {
-    setExportandoVistaPdf(true);
-    try {
-      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const nombreTitulo = filtroArea !== "Todas" ? `Reporte - ${filtroArea} (${filtroEstado})` : `Reporte General (${filtroEstado})`;
-      generarReportePorArea(nombreTitulo, visibles, { usuarioFirma });
-    } catch (err) {
-      alert(`No se pudo generar el reporte PDF: ${err.message}`);
-    } finally {
-      setExportandoVistaPdf(false);
-    }
-  }
-
-  async function handleExportarVistaExcel() {
-    setExportandoVistaExcel(true);
-    try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
-      );
-      const nombreTitulo = filtroArea !== "Todas" ? `${filtroArea} - ${filtroEstado}` : `General - ${filtroEstado}`;
-      await Promise.race([generarReporteExcelPorArea(nombreTitulo, visibles), timeoutPromise]);
-    } catch (err) {
-      alert(`No se pudo generar el Excel: ${err.message}`);
-    } finally {
-      setExportandoVistaExcel(false);
-    }
   }
 
   const ESTADO_FILTRO_LABEL = {
@@ -508,43 +526,30 @@ export default function Dashboard() {
           style={{
             maxWidth: modoPresentacion ? "100%" : 1500,
             margin: "0 auto",
-            padding: modoPresentacion ? "32px 48px" : "28px 28px",
+            padding: modoPresentacion ? "18px 48px" : "16px 28px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-start",
             flexWrap: "wrap",
-            gap: 28,
+            gap: 12,
             color: "#ffffff",
           }}
         >
-          {/* LOGOTIPO CORREGIDO CON CONTENEDOR FLEXIBLE DE TAMAÑO FIJO Y RESPALDO */}
-          <div style={{ display: "flex", alignItems: "center", gap: 24, minWidth: 0 }}>
-            <div style={{ width: "90px", height: "90px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img
-                src={typeof LOGO_PUNO_BASE64 !== "undefined" && LOGO_PUNO_BASE64 ? LOGO_PUNO_BASE64 : ""}
-                alt="Escudo Gobierno Regional de Puno"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  e.currentTarget.parentElement.innerHTML = '<span style="color: #e5b80b; font-weight: 800; font-size: 16px;">GORE</span>';
-                }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  filter: "drop-shadow(0 0 12px rgba(229,184,11,.7))",
-                  display: "block",
-                }}
-              />
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontSize: modoPresentacion ? 40 : 26, marginBottom: 8, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 20px rgba(229,184,11,.8)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <img
+              src={LOGO_PUNO_BASE64}
+              alt="Escudo Gobierno Regional de Puno"
+              style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
+            />
+            <div>
+              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
-              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 8, fontSize: modoPresentacion ? 18 : 15 }}>
+              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
-                <p style={{ color: "#e5b80b", fontSize: 12, marginTop: 0, fontWeight: 700 }}>
+                <p style={{ color: "#e5b80b", fontSize: 11, marginTop: 0, fontWeight: 700 }}>
                   Última sincronización: {tiempoRelativo(resumen.ultimaSync.toDate())}
                   {usuarioGoogle && <span style={{ marginLeft: 8, color: "#457b9d" }}>· {usuarioGoogle.email}</span>}
                 </p>
@@ -576,7 +581,7 @@ export default function Dashboard() {
             )}
 
             <button
-              onClick={() => handleExportarGlobalPorEstado("todas")}
+              onClick={handleExportarGlobal}
               disabled={exportandoGlobal || carpetas.length === 0}
               style={{
                 fontSize: 13,
@@ -923,6 +928,88 @@ export default function Dashboard() {
               }}
             />
 
+            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
+            <div
+              style={{
+                background: "#141c24",
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #e5b80b66",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
+                ⚙️ Filtro para exportar PDF/Excel:
+              </span>
+              <select
+                value={tipoExportacion}
+                onChange={(e) => setTipoExportacion(e.target.value)}
+                style={{
+                  background: "#0c1015",
+                  color: "#e5b80b",
+                  border: "1.5px solid #e5b80b",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="todas">Todas las carpetas</option>
+                <option value="incompletas">Solo incompletas</option>
+                <option value="vacias">Solo vacías</option>
+                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
+              </select>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+              {areas.map((a) => (
+                <div key={a} style={{ display: "flex", gap: 4 }}>
+                  <button
+                    onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
+                    disabled={exportandoArea === a}
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 12px",
+                      borderRadius: "20px 0 0 20px",
+                      border: "1.5px solid #457b9d",
+                      background: "#141c24",
+                      color: exportandoArea === a ? "#a8dadc" : "#ffffff",
+                      fontWeight: 600,
+                      cursor: exportandoArea === a ? "not-allowed" : "pointer",
+                    }}
+                    title={`Exportar reporte PDF de ${a}`}
+                  >
+                    📄 {exportandoArea === a ? "Generando..." : `PDF ${a}`}
+                  </button>
+                  <button
+                    onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
+                    disabled={exportandoExcelArea === a}
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 12px",
+                      borderRadius: "0 20px 20px 0",
+                      border: "1.5px solid #457b9d",
+                      borderLeft: "none",
+                      background: "#141c24",
+                      color: exportandoExcelArea === a ? "#a8dadc" : "#e5b80b",
+                      fontWeight: 600,
+                      cursor: exportandoExcelArea === a ? "not-allowed" : "pointer",
+                    }}
+                    title={`Exportar reporte Excel de ${a}`}
+                  >
+                    📊 {exportandoExcelArea === a ? "Generando..." : "Excel"}
+                  </button>
+                </div>
+              ))}
+            </div>
+
             <div
               style={{
                 display: "grid",
@@ -962,6 +1049,7 @@ export default function Dashboard() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
+            {/* BOTONES DE FILTRO Y CONTROL */}
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {ESTADO_OPTIONS.map((opt) => (
                 <button
@@ -972,57 +1060,12 @@ export default function Dashboard() {
                   {opt.label}
                 </button>
               ))}
-
               <button
                 onClick={() => setColapsados((prev) => ({ ...prev, __all: !prev.__all }))}
                 style={{ ...chipStyle(false, "#a8dadc"), fontWeight: 700 }}
               >
                 {colapsados.__all ? "▸ Expandir todo" : "▾ Colapsar todo"}
               </button>
-
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginLeft: 4 }}>
-                <button
-                  onClick={handleExportarVistaPdf}
-                  disabled={exportandoVistaPdf || visibles.length === 0}
-                  style={{
-                    fontSize: 12,
-                    padding: "8px 14px",
-                    borderRadius: 20,
-                    border: "1.5px solid #e5b80b",
-                    background: "#e5b80b22",
-                    color: "#e5b80b",
-                    fontWeight: 700,
-                    cursor: exportandoVistaPdf || visibles.length === 0 ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                  title="Exportar en PDF la vista filtrada actual"
-                >
-                  <span>📥</span> {exportandoVistaPdf ? "Generando..." : "PDF Vista"}
-                </button>
-
-                <button
-                  onClick={handleExportarVistaExcel}
-                  disabled={exportandoVistaExcel || visibles.length === 0}
-                  style={{
-                    fontSize: 12,
-                    padding: "8px 14px",
-                    borderRadius: 20,
-                    border: "1.5px solid #2a9d8f",
-                    background: "#2a9d8f22",
-                    color: "#2a9d8f",
-                    fontWeight: 700,
-                    cursor: exportandoVistaExcel || visibles.length === 0 ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                  title="Exportar en Excel la vista filtrada actual"
-                >
-                  <span>📊</span> {exportandoVistaExcel ? "Generando..." : "Excel Vista"}
-                </button>
-              </div>
             </div>
 
             <div
@@ -1106,6 +1149,7 @@ export default function Dashboard() {
                           {g.area}
                         </span>
                         <span style={{ color: "#e5b80b", fontSize: 12 }}>›</span>
+                        {/* TÍTULO PRINCIPAL DE LA ESPECIALIDAD RESALTADO EN DORADO CON TEXTO OSCURO */}
                         <span
                           style={{
                             fontSize: 15,
@@ -1749,7 +1793,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
       }}
     >
       <div style={{ fontSize: grande ? 20 : 15, fontWeight: 700, color: "#ffffff", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>📈 Tendencia de avance {historial.length > 0 ? `(${historial.length} days)` : ""}</span>
+        <span>📈 Tendencia de avance {historial.length > 0 ? `(${historial.length} días)` : ""}</span>
         <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>Desliza horizontalmente ↔</span>
       </div>
 
