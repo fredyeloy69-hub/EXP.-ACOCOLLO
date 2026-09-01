@@ -336,7 +336,6 @@ export default function Dashboard() {
     );
   }
 
-  // EXPORTAR VISTA ACTUAL FILTRADA (PDF)
   function handleExportarVistaPdf() {
     setExportandoVistaPdf(true);
     try {
@@ -350,7 +349,6 @@ export default function Dashboard() {
     }
   }
 
-  // EXPORTAR VISTA ACTUAL FILTRADA (EXCEL)
   async function handleExportarVistaExcel() {
     setExportandoVistaExcel(true);
     try {
@@ -519,17 +517,19 @@ export default function Dashboard() {
             color: "#ffffff",
           }}
         >
-          {/* LOGO AMPLIADO AL TRIPLE (X3) Y SEPARADO CON 48PX */}
+          {/* LOGOTIPO CORREGIDO CON PROPORCIONES ADECUADAS Y OBJECT-FIT */}
           <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
               style={{
-                width: modoPresentacion ? 340 : 260,
-                height: modoPresentacion ? 376 : 288,
+                width: modoPresentacion ? 140 : 100,
+                height: "auto",
+                objectFit: "contain",
                 flexShrink: 0,
-                marginRight: 24,
-                filter: "drop-shadow(0 0 28px rgba(229,184,11,.7))",
+                marginRight: 12,
+                filter: "drop-shadow(0 0 18px rgba(229,184,11,.7))",
+                display: "block",
               }}
             />
             <div>
@@ -958,7 +958,6 @@ export default function Dashboard() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
-            {/* BOTONES DE FILTRO Y BOTONES DE EXPORTAR VISTA ACTUAL JUSTO AL LADO */}
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {ESTADO_OPTIONS.map((opt) => (
                 <button
