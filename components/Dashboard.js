@@ -517,22 +517,22 @@ export default function Dashboard() {
             color: "#ffffff",
           }}
         >
-          {/* LOGOTIPO CORREGIDO CON PROPORCIONES ADECUADAS Y OBJECT-FIT */}
-          <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
-            <img
-              src={LOGO_PUNO_BASE64}
-              alt="Escudo Gobierno Regional de Puno"
-              style={{
-                width: modoPresentacion ? 140 : 100,
-                height: "auto",
-                objectFit: "contain",
-                flexShrink: 0,
-                marginRight: 12,
-                filter: "drop-shadow(0 0 18px rgba(229,184,11,.7))",
-                display: "block",
-              }}
-            />
-            <div>
+          {/* LOGOTIPO CORREGIDO CON CONTENEDOR FLEXIBLE DE TAMAÑO FIJO Y SIN CORTE */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24, minWidth: 0 }}>
+            <div style={{ width: "90px", height: "90px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img
+                src={LOGO_PUNO_BASE64}
+                alt="Escudo Gobierno Regional de Puno"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 0 12px rgba(229,184,11,.7))",
+                  display: "block",
+                }}
+              />
+            </div>
+            <div style={{ minWidth: 0 }}>
               <h1 style={{ fontSize: modoPresentacion ? 40 : 26, marginBottom: 8, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 20px rgba(229,184,11,.8)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
