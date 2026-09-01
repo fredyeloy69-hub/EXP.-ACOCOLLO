@@ -233,7 +233,7 @@ export default function Dashboard() {
     setMarcandoId(folderId);
     try {
       const idToken = await user.getIdToken();
-      const res = await fetch("/api/marcar-completa", {
+      const res = await fetch("/api/marcar-completo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folderId, forzada, motivo, idToken, folderName, folderRuta }),
@@ -1616,7 +1616,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
   const altoBarras = grande ? 100 : 70;
   const alto = altoLinea + altoBarras;
   
-  const anchoPunto = grande ? 65 : 55; // Separación amplia para evitar amontonamientos
+  const anchoPunto = grande ? 65 : 55;
   const paddingIzq = 60;
   const paddingDer = 40;
   const anchoMinimo = grande ? 960 : 720;
