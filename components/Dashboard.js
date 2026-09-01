@@ -127,6 +127,7 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
+  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
@@ -169,11 +170,26 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
+  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
+  function filtrarCarpetasParaExportar(listaCarpetas) {
+    if (tipoExportacion === "incompletas") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta");
+    }
+    if (tipoExportacion === "vacias") {
+      return listaCarpetas.filter((c) => c.estado === "vacia");
+    }
+    if (tipoExportacion === "incompletas_vacias") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
+    }
+    return listaCarpetas; // "todas"
+  }
+
   function handleExportarArea(areaNombre, carpetasDelArea) {
     setExportandoArea(areaNombre);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      generarReportePorArea(areaNombre, carpetasDelArea, { usuarioFirma });
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
     } finally {
       setExportandoArea(null);
     }
@@ -183,7 +199,8 @@ export default function Dashboard() {
     setExportandoGlobal(true);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      generarReporteConsolidadoGlobal(carpetas, { usuarioFirma });
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
     } catch (err) {
       alert(`No se pudo generar el reporte consolidado: ${err.message}`);
     } finally {
@@ -197,8 +214,9 @@ export default function Dashboard() {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
       await Promise.race([
-        generarReporteExcelPorArea(areaNombre, carpetasDelArea),
+        generarReporteExcelPorArea(areaNombre, listaFiltrada),
         timeoutPromise,
       ]);
     } catch (err) {
@@ -910,6 +928,46 @@ export default function Dashboard() {
               }}
             />
 
+            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
+            <div
+              style={{
+                background: "#141c24",
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #e5b80b66",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
+                ⚙️ Filtro para exportar PDF/Excel:
+              </span>
+              <select
+                value={tipoExportacion}
+                onChange={(e) => setTipoExportacion(e.target.value)}
+                style={{
+                  background: "#0c1015",
+                  color: "#e5b80b",
+                  border: "1.5px solid #e5b80b",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="todas">Todas las carpetas</option>
+                <option value="incompletas">Solo incompletas</option>
+                <option value="vacias">Solo vacías</option>
+                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
+              </select>
+            </div>
+
             <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               {areas.map((a) => (
                 <div key={a} style={{ display: "flex", gap: 4 }}>
@@ -1288,7 +1346,7 @@ export default function Dashboard() {
           zIndex: 50,
           background: "rgba(20, 28, 36, 0.92)",
           backdropFilter: "blur(16px)",
-          border: "2px solid #e5b80b",
+          border: "2.5px solid #e5b80b",
           borderRadius: 32,
           padding: "10px 22px",
           display: "flex",
@@ -1592,7 +1650,6 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
   );
 }
 
-/* PANEL DE DATOS DE CARPETA MADRE / ÁREA */
 function AreaProgressPanel({ area, stats, color }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#141c24", border: `2.5px solid #e5b80b`, borderRadius: 12, padding: "18px 22px", marginBottom: 14, boxShadow: `0 4px 20px rgba(229,184,11,.2)` }}>
