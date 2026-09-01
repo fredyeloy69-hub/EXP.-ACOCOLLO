@@ -22,11 +22,30 @@ const NARANJA = [243, 156, 18];
 const ROJO = [231, 76, 60];
 const AZUL_OSCURO = [20, 30, 60];
 
+function dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX) {
+  let y = 12;
+  if (logoBase64) {
+    const anchoLogo = 13;
+    const altoLogo = 14.6;
+    doc.addImage(logoBase64, "PNG", marginX, y - 3, anchoLogo, altoLogo);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("GOBIERNO REGIONAL DE PUNO GERENCIA REGIONAL DE INFRAESTRUCTURA", pageWidth / 2, y, { align: "center" });
+  y += 5;
+  doc.text("SUB GERENCIA DE ESTUDIOS DEFINITIVOS", pageWidth / 2, y, { align: "center" });
+  y += 6;
+  doc.setFontSize(8.5);
+  const lineasProyecto = doc.splitTextToSize(proyectoNombre, pageWidth - marginX * 2 - 10);
+  doc.text(lineasProyecto, pageWidth / 2, y, { align: "center" });
+  y += lineasProyecto.length * 4 + 4;
+  return y;
+}
+
 export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre =
-      '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEL DEPARTAMENTO DE PUNO"',
+    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEL DEPARTAMENTO DE PUNO"',
   } = opts;
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -62,19 +81,14 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const body = [];
   let contadorFila = 1;
 
-  // Compara nombres respetando numeración real (01,02,10 / Anexo1,Anexo2,Anexo10 / etc.)
   function comparaNatural(a, b) {
     return (a || "").localeCompare(b || "", undefined, { numeric: true, sensitivity: "base" });
   }
 
-  // Mezcla un color con blanco según un factor (0 = color puro, 1 = blanco puro) —
-  // para crear el efecto "cada vez más pálido/transparente" según el nivel.
   function mezclarConBlanco(rgb, factor) {
     return rgb.map((c) => Math.round(c + (255 - c) * factor));
   }
 
-  // Colores de fondo para las carpetas FINALES (las filas con COMPLETA/INCOMPLETA/VACÍA),
-  // no solo para los encabezados de subcarpeta — mientras más profundo el nivel, más pálido.
   const FACTORES_HOJA = [0.72, 0.80, 0.86, 0.90, 0.93];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min(nivelVisual - 1, FACTORES_HOJA.length - 1)];
@@ -84,7 +98,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   function empujarFila(c, nivelVisual) {
     const estado = c.estado || "incompleta";
     const nombreMostrado = c.nombre || (c.ruta || "").split(" / ").pop() || "-";
-    const sangriaIzq = 2 + Math.max(0, nivelVisual - 1) * 6; // sangría real en mm, no espacios de texto
+    const sangriaIzq = 2 + Math.max(0, nivelVisual - 1) * 6;
     const fondo = colorHoja(nivelVisual);
     body.push([
       { content: String(contadorFila++), styles: { fillColor: fondo } },
@@ -98,12 +112,10 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   }
 
   function empujarSubEncabezado(nombre, nivel) {
-    // Mismo tono naranja de la carpeta madre, pero cada vez más pálido mientras
-    // más profundo el nivel (2, 3, 4) — la carpeta madre es la más nítida.
-    const factoresPorNivel = [0.45, 0.65, 0.82]; // nivel 2, 3, 4
+    const factoresPorNivel = [0.45, 0.65, 0.82];
     const factor = factoresPorNivel[Math.min(nivel - 2, factoresPorNivel.length - 1)];
     const color = mezclarConBlanco(NARANJA_HEADER, factor);
-    const sangriaIzq = 2 + (nivel - 1) * 6; // sangría real en mm — cada nivel más adentro que el anterior, tipo escalera
+    const sangriaIzq = 2 + (nivel - 1) * 6;
     body.push([
       {
         content: `➤  ${nombre}`,
@@ -120,14 +132,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     ]);
   }
 
-  // Agrupa recursivamente por cada segmento de ruta, hasta NIVEL_MAX_INTERMEDIO
-  // niveles intermedios (especialidad=nivel1, hasta 3 intermedios más = nivel4,
-  // y el ítem final = nivel5 → 5 niveles totales, como se pidió). TODO se
-  // intercala en un solo orden natural (01,02,03... o Anexo1,Anexo2...) — un
-  // ítem suelto (ej. "2.6") y una subcarpeta con más adentro (ej. "2.7") se
-  // ordenan juntos por su propio nombre, no separados en dos grupos distintos
-  // (eso era el bug: antes todos los "sueltos" salían primero, sin importar numeración).
-  const NIVEL_MAX_INTERMEDIO = 4; // índice de partes[] hasta donde se agrupa (2,3,4)
+  const NIVEL_MAX_INTERMEDIO = 4;
   function agruparRecursivo(items, nivelIdx, nivelVisual) {
     if (nivelIdx > NIVEL_MAX_INTERMEDIO) {
       const ordenado = [...items].sort((a, b) => comparaNatural(a.nombre, b.nombre));
@@ -139,10 +144,9 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     let hayNivelMasProfundo = false;
     for (const c of items) {
       const partes = (c.ruta || c.nombre || "").split(" / ").filter(Boolean);
-      // partes[nivelIdx] existe y NO es el último segmento (el nombre final) → hay un nivel más
       const clave = partes.length > nivelIdx + 1 ? partes[nivelIdx] : null;
       if (clave) hayNivelMasProfundo = true;
-      const key = clave || `__directo__${c.nombre || c.id}`; // clave única por ítem suelto
+      const key = clave || `__directo__${c.nombre || c.id}`;
       if (!subgrupos[key]) subgrupos[key] = [];
       subgrupos[key].push(c);
     }
@@ -153,8 +157,6 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
       return;
     }
 
-    // Cada entrada (sea ítem suelto o subgrupo) se ordena por SU PROPIO nombre,
-    // todas juntas — así queda exactamente el orden real del Drive.
     const entradas = Object.keys(subgrupos).map((key) => ({
       key,
       nombreOrden: key.startsWith("__directo__") ? subgrupos[key][0].nombre || "" : key,
@@ -180,28 +182,8 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     agruparRecursivo(grupos[especialidad], 2, 1);
   }
 
-  function dibujarBloqueInstitucional() {
-    let y = 12;
-    if (logoBase64) {
-      const anchoLogo = 13;
-      const altoLogo = 14.6;
-      doc.addImage(logoBase64, "PNG", marginX, y - 3, anchoLogo, altoLogo);
-    }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("GOBIERNO REGIONAL DE PUNO GERENCIA REGIONAL DE INFRAESTRUCTURA", pageWidth / 2, y, { align: "center" });
-    y += 5;
-    doc.text("SUB GERENCIA DE ESTUDIOS DEFINITIVOS", pageWidth / 2, y, { align: "center" });
-    y += 6;
-    doc.setFontSize(8.5);
-    const lineasProyecto = doc.splitTextToSize(proyectoNombre, pageWidth - marginX * 2 - 10);
-    doc.text(lineasProyecto, pageWidth / 2, y, { align: "center" });
-    y += lineasProyecto.length * 4 + 4;
-    return y;
-  }
-
   function dibujarEncabezado() {
-    let y = dibujarBloqueInstitucional();
+    let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
 
     doc.setFillColor(...AZUL_OSCURO);
     doc.rect(marginX, y, pageWidth - marginX * 2, 9, "F");
@@ -243,10 +225,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     doc.setTextColor(0, 0, 0);
   }
 
-  // ============================================================
-  // PORTADA — resumen gráfico, como el modo presentación del dashboard
-  // ============================================================
-  let y = dibujarBloqueInstitucional();
+  let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
 
   doc.setFillColor(...AZUL_OSCURO);
   doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
@@ -337,9 +316,6 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     y += 8.5;
   }
 
-  // ============================================================
-  // DETALLE — tabla carpeta por carpeta (empieza en página nueva)
-  // ============================================================
   doc.addPage();
   const primeraPaginaTabla = doc.internal.getCurrentPageInfo().pageNumber;
   const startY = dibujarEncabezado();
@@ -376,5 +352,92 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const nombreArchivo = `Reporte_${areaNombre.replace(/[^a-zA-Z0-9]+/g, "_")}_${new Date()
     .toISOString()
     .slice(0, 10)}.pdf`;
+  doc.save(nombreArchivo);
+}
+
+// Función consolidada global requerida por el Dashboard
+export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
+  const {
+    logoBase64 = LOGO_PUNO_BASE64,
+    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEL DEPARTAMENTO DE PUNO"',
+  } = opts;
+
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 14;
+
+  let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
+
+  doc.setFillColor(...AZUL_OSCURO);
+  doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("REPORTE CONSOLIDADO GLOBAL DE AVANCE", pageWidth / 2, y + 7.5, { align: "center" });
+  doc.setTextColor(0, 0, 0);
+  y += 20;
+
+  const fechaGenerado = new Date().toLocaleString("es-PE");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generado: ${fechaGenerado}`, pageWidth / 2, y, { align: "center" });
+  doc.setTextColor(0, 0, 0);
+  y += 12;
+
+  const body = [];
+  let contador = 1;
+  let totalGlobalCarpetas = 0;
+  let totalGlobalCompletas = 0;
+
+  const areasEntries = Array.isArray(datosAreas) ? datosAreas : Object.entries(datosAreas);
+
+  for (const entry of areasEntries) {
+    const areaNombre = Array.isArray(datosAreas) ? entry.nombre : entry[0];
+    const carpetas = Array.isArray(datosAreas) ? entry.carpetas : entry[1];
+
+    if (!carpetas || carpetas.length === 0) continue;
+
+    const cantTotal = carpetas.length;
+    const cantCompletas = carpetas.filter((c) => c.estado === "completa").length;
+    const pctArea = cantTotal > 0 ? Math.round((cantCompletas / cantTotal) * 100) : 0;
+
+    totalGlobalCarpetas += cantTotal;
+    totalGlobalCompletas += cantCompletas;
+
+    body.push([
+      { content: String(contador++), styles: { halign: "center", fontStyle: "bold" } },
+      { content: areaNombre.toUpperCase(), styles: { fontStyle: "bold" } },
+      { content: `${cantCompletas} / ${cantTotal}`, styles: { halign: "center" } },
+      { content: `${pctArea}%`, styles: { halign: "center", fontStyle: "bold", textColor: pctArea >= 100 ? VERDE : TEAL } },
+    ]);
+  }
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: marginX, right: marginX },
+    head: [["N°", "ÁREA / COMPONENTE", "COMPLETADAS / TOTAL", "% AVANCE"]],
+    body,
+    styles: { fontSize: 9, cellPadding: 3, valign: "middle" },
+    headStyles: { fillColor: AZUL_OSCURO, textColor: 255, fontStyle: "bold" },
+    columnStyles: {
+      0: { cellWidth: 12, halign: "center" },
+      1: { cellWidth: "auto" },
+      2: { cellWidth: 45, halign: "center" },
+      3: { cellWidth: 30, halign: "center" },
+    },
+  });
+
+  const totalPaginas = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPaginas; p++) {
+    doc.setPage(p);
+    doc.setFontSize(7.5);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Página ${p} de ${totalPaginas}`, pageWidth - marginX, pageHeight - 8, { align: "right" });
+    doc.setTextColor(0, 0, 0);
+  }
+
+  const nombreArchivo = `Reporte_Consolidado_Global_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(nombreArchivo);
 }
