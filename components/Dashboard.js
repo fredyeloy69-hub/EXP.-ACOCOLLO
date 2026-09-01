@@ -952,7 +952,7 @@ export default function Dashboard() {
               }}
             />
 
-            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
+            {/* SELECTOR DE FILTRO Y BOTÓN DE EXPORTACIÓN DIRECTA */}
             <div
               style={{
                 background: "#141c24",
@@ -967,29 +967,54 @@ export default function Dashboard() {
                 flexWrap: "wrap",
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
-                ⚙️ Filtro para exportar PDF/Excel:
-              </span>
-              <select
-                value={tipoExportacion}
-                onChange={(e) => setTipoExportacion(e.target.value)}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
+                  ⚙️ Filtro para exportar PDF/Excel:
+                </span>
+                <select
+                  value={tipoExportacion}
+                  onChange={(e) => setTipoExportacion(e.target.value)}
+                  style={{
+                    background: "#0c1015",
+                    color: "#e5b80b",
+                    border: "1.5px solid #e5b80b",
+                    borderRadius: 6,
+                    padding: "6px 10px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    outline: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="todas">Todas las carpetas</option>
+                  <option value="incompletas">Solo incompletas</option>
+                  <option value="vacias">Solo vacías</option>
+                  <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
+                </select>
+              </div>
+
+              {/* BOTÓN DE EXPORTACIÓN GLOBAL DIRECTA DEL FILTRO */}
+              <button
+                onClick={handleExportarGlobal}
+                disabled={exportandoGlobal || carpetas.length === 0}
                 style={{
-                  background: "#0c1015",
-                  color: "#e5b80b",
+                  fontSize: 11,
+                  padding: "7px 14px",
+                  borderRadius: 8,
                   border: "1.5px solid #e5b80b",
-                  borderRadius: 6,
-                  padding: "6px 10px",
-                  fontSize: 12,
+                  background: "#141c24",
+                  color: exportandoGlobal ? "#a8dadc" : "#e5b80b",
                   fontWeight: 700,
-                  outline: "none",
-                  cursor: "pointer",
+                  cursor: exportandoGlobal || carpetas.length === 0 ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  boxShadow: "0 2px 10px rgba(229,184,11,.25)",
                 }}
+                title="Generar PDF consolidado aplicando el filtro seleccionado"
               >
-                <option value="todas">Todas las carpetas</option>
-                <option value="incompletas">Solo incompletas</option>
-                <option value="vacias">Solo vacías</option>
-                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
-              </select>
+                <span>📄</span> {exportandoGlobal ? "Generando Filtro..." : "Exportar Filtro PDF"}
+              </button>
             </div>
 
             {/* BOTONES DE EXPORTAR POR ÁREA (MUY VISIBLES Y DESTACADOS) */}
