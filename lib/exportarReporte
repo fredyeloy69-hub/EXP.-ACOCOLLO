@@ -68,7 +68,7 @@ function dibujarTarjeta(doc, x, y, ancho, alto, valor, etiqueta, colorRgb) {
 export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"CREACIÓN DE LOS SERVICIOS DE SALUD DEL CENTRO DE SALUD ACOCOLLO I-2"',
+    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN ACOCOLLO DISTRITO DE HUANCANE DE LA PROVINCIA DE HUANCANE DEL DEPARTAMENTO DE PUNO"',
     usuarioFirma = "Sistema Acocollo I-2",
   } = opts;
 
@@ -376,7 +376,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
 export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"CREACIÓN DE LOS SERVICIOS DE SALUD DEL CENTRO DE SALUD ACOCOLLO I-2"',
+    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN ACOCOLLO DISTRITO DE HUANCANE DE LA PROVINCIA DE HUANCANE DEL DEPARTAMENTO DE PUNO"',
     usuarioFirma = "Sistema Acocollo I-2",
   } = opts;
 
