@@ -933,7 +933,7 @@ export default function Dashboard() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
-            {/* BOTONES DE FILTRO Y BOTONES DE EXPORTAR VISTA ACTUAL */}
+            {/* BOTONES DE FILTRO + BOTONES DE EXPORTAR VISTA ACTUAL AL LADO */}
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {ESTADO_OPTIONS.map((opt) => (
                 <button
@@ -969,7 +969,7 @@ export default function Dashboard() {
                     alignItems: "center",
                     gap: 6,
                   }}
-                  title="Exportar en PDF la vista seleccionada actual"
+                  title="Exportar en PDF la vista filtrada actual"
                 >
                   <span>📥</span> {exportandoVistaPdf ? "Generando..." : "PDF Vista"}
                 </button>
@@ -990,7 +990,7 @@ export default function Dashboard() {
                     alignItems: "center",
                     gap: 6,
                   }}
-                  title="Exportar en Excel la vista seleccionada actual"
+                  title="Exportar en Excel la vista filtrada actual"
                 >
                   <span>📊</span> {exportandoVistaExcel ? "Generando..." : "Excel Vista"}
                 </button>
