@@ -68,8 +68,8 @@ function dibujarTarjeta(doc, x, y, ancho, alto, valor, etiqueta, colorRgb) {
 export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS IN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEPARTAMENTO DE PUNO"',
-    usuarioFirma = "Sistema Chijnaya",
+    proyectoNombre = '"CREACIÓN DE LOS SERVICIOS DE SALUD DEL CENTRO DE SALUD ACOCOLLO I-2"',
+    usuarioFirma = "Sistema Acocollo I-2",
   } = opts;
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -376,8 +376,8 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
 export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS IN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEPARTAMENTO DE PUNO"',
-    usuarioFirma = "Sistema Chijnaya",
+    proyectoNombre = '"CREACIÓN DE LOS SERVICIOS DE SALUD DEL CENTRO DE SALUD ACOCOLLO I-2"',
+    usuarioFirma = "Sistema Acocollo I-2",
   } = opts;
 
   let todasLasCarpetas = [];
@@ -548,7 +548,6 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     const pctArchArea = necArea > 0 ? Math.round((compArea / necArea) * 100) : 0;
     const pctCarpArea = totalArea > 0 ? Math.round((completasArea / totalArea) * 100) : 0;
 
-    // Nueva página para la portada de cada área
     doc.addPage();
     let yArea = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
 
@@ -597,7 +596,6 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     dibujarTarjeta(doc, marginX + (anchoTarjeta + 4) * 2, yArea, anchoTarjeta, altoTarjeta, incompletasArea, "INCOMPLETAS", NARANJA);
     dibujarTarjeta(doc, marginX + (anchoTarjeta + 4) * 3, yArea, anchoTarjeta, altoTarjeta, vaciasArea, "VACÍAS", ROJO);
 
-    // Página siguiente: Tabla de detalle para esta área
     doc.addPage();
     
     function dibujarEncabezadoAreaTabla() {
@@ -618,7 +616,6 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
 
     const startYAreaTabla = dibujarEncabezadoAreaTabla();
 
-    // Construir el body agrupado por especialidad para esta área
     const gruposEsp = {};
     const ordenEsp = [];
     for (const c of carpetasArea) {
@@ -756,7 +753,6 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     });
   }
 
-  // Numeración de páginas global al pie
   const totalPaginas = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPaginas; p++) {
     doc.setPage(p);
