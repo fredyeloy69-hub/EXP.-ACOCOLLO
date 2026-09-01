@@ -758,17 +758,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sección de Tendencia de avance y Actividad */}
-        {historial.length >= 2 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16, marginBottom: 32 }}>
-            <TendenciaChart historial={historial} grande={modoPresentacion} actividadPorDia={actividadPorDia} />
-            <ActividadHeatmap actividadPorDia={actividadPorDia} diasCustom={rangoDiasHeatmap} grande={modoPresentacion} onMarcarCompleta={handleMarcarCompleta} marcandoId={marcandoId} />
-          </div>
-        ) : (
-          <div style={{ marginBottom: 32 }}>
-            <ActividadHeatmap actividadPorDia={actividadPorDia} diasCustom={rangoDiasHeatmap} grande={modoPresentacion} onMarcarCompleta={handleMarcarCompleta} marcandoId={marcandoId} />
-          </div>
-        )}
+        {/* Sección de Tendencia de avance y Actividad (Modificada para mostrarse siempre) */}
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16, marginBottom: 32 }}>
+          <TendenciaChart historial={historial} grande={modoPresentacion} actividadPorDia={actividadPorDia} />
+          <ActividadHeatmap actividadPorDia={actividadPorDia} diasCustom={rangoDiasHeatmap} grande={modoPresentacion} onMarcarCompleta={handleMarcarCompleta} marcandoId={marcandoId} />
+        </div>
 
         {modoPresentacion && (
           <div
