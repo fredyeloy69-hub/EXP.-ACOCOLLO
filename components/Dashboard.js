@@ -510,7 +510,7 @@ export default function Dashboard() {
           style={{
             maxWidth: modoPresentacion ? "100%" : 1500,
             margin: "0 auto",
-            padding: modoPresentacion ? "20px 48px" : "18px 28px",
+            padding: modoPresentacion ? "22px 48px" : "20px 28px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -519,17 +519,17 @@ export default function Dashboard() {
             color: "#ffffff",
           }}
         >
-          {/* LOGO AMPLIADO 150% MÁS GRANDE Y SEPARADO DEL TEXTO */}
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          {/* LOGO AMPLIADO 200% MÁS GRANDE Y CON AMPLIA SEPARACIÓN */}
+          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
               style={{
-                width: modoPresentacion ? 110 : 85,
-                height: modoPresentacion ? 122 : 95,
+                width: modoPresentacion ? 135 : 110,
+                height: modoPresentacion ? 150 : 122,
                 flexShrink: 0,
-                marginRight: 6,
-                filter: "drop-shadow(0 0 12px rgba(229,184,11,.4))",
+                marginRight: 10,
+                filter: "drop-shadow(0 0 16px rgba(229,184,11,.5))",
               }}
             />
             <div>
