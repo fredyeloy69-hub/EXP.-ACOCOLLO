@@ -8,13 +8,13 @@ const ESTADO_LABEL = {
 };
 
 const ESTADO_COLOR = {
-  completa: "FF2ECC71",
+  completa: "FF2A9D8F",
   incompleta: "FFF39C12",
-  vacia: "FFE74C3C",
+  vacia: "FFC0392B",
 };
 
-const AZUL_OSCURO = "FF141E3C";
-const NARANJA = "FFE67E22";
+const AZUL_PETROLEO = "FF264653";
+const VERDE_AZULADO = "FF2A9D8F";
 
 /**
  * Genera y descarga un Excel (.xlsx) con formato real — encabezado institucional,
@@ -76,14 +76,14 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
   sheet.getCell("A3").value = "PROYECTO: MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN ACOCOLLO DISTRITO DE HUANCANE DE LA PROVINCIA DE HUANCANE DEL DEPARTAMENTO DE PUNO";
   sheet.getCell("A3").font = { bold: true, size: 10, color: { argb: "FFC0392B" } };
   sheet.getCell("A3").alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-  sheet.getRow(3).height = 30; // Altura aumentada para que entre el texto largo
+  sheet.getRow(3).height = 30;
 
   sheet.mergeCells("A4:D4");
   const celdaTitulo = sheet.getCell("A4");
   celdaTitulo.value = `REPORTE DE AVANCE — ${areaNombre.toUpperCase()}`;
   celdaTitulo.font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   celdaTitulo.alignment = { horizontal: "center", vertical: "middle" };
-  celdaTitulo.fill = { type: "pattern", pattern: "solid", fgColor: { argb: AZUL_OSCURO } };
+  celdaTitulo.fill = { type: "pattern", pattern: "solid", fgColor: { argb: AZUL_PETROLEO } };
   sheet.getRow(4).height = 22;
 
   const total = carpetasDelArea.length;
@@ -109,7 +109,7 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
   filaEncabezado.values = ["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"];
   filaEncabezado.eachCell((cell) => {
     cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: AZUL_OSCURO } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: AZUL_PETROLEO } };
     cell.alignment = { vertical: "middle", horizontal: "center" };
     cell.border = { bottom: { style: "medium", color: { argb: "FF000000" } } };
   });
@@ -146,7 +146,7 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
   const FACTORES_HOJA = [0.72, 0.80, 0.86, 0.90, 0.93];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min((nivelVisual || 1) - 1, FACTORES_HOJA.length - 1)];
-    return mezclarConBlanco(NARANJA, factor);
+    return mezclarConBlanco(VERDE_AZULADO, factor);
   }
 
   function agregarSubEncabezado(nombre, nivel) {
@@ -156,11 +156,11 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     const esNivel1 = nivel === 1;
     const factoresPorNivel = [0, 0.45, 0.65, 0.82];
     const factor = factoresPorNivel[Math.min(nivel - 1, factoresPorNivel.length - 1)];
-    celda.font = { bold: true, size: esNivel1 ? 13 : 11, color: { argb: esNivel1 ? "FFFFFFFF" : "FF4A2D0F" } };
+    celda.font = { bold: true, size: esNivel1 ? 13 : 11, color: { argb: esNivel1 ? "FFFFFFFF" : "FF1A3840" } };
     celda.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: mezclarConBlanco(NARANJA, factor) },
+      fgColor: { argb: mezclarConBlanco(VERDE_AZULADO, factor) },
     };
     celda.alignment = { horizontal: "left", vertical: "middle", indent: Math.max(0, nivel - 1) * 2 };
     fila.height = esNivel1 ? 20 : 17;
