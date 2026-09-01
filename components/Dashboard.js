@@ -410,7 +410,7 @@ export default function Dashboard() {
           z-index: 40;
           backdrop-filter: blur(10px);
           background: rgba(16,29,36,.95);
-          border-bottom: 1px solid #2a9d8f55;
+          border-bottom: 2px solid #d4af37;
         }
         .acocollo-fade-in {
           animation: acocolloFadeIn .28s ease both;
@@ -454,7 +454,7 @@ export default function Dashboard() {
         .acocollo-celda-heatmap:hover {
           transform: scale(1.35);
           transition: transform .12s ease;
-          box-shadow: 0 0 8px rgba(42,157,143,.8);
+          box-shadow: 0 0 8px rgba(212,175,55,.8);
           z-index: 70;
         }
         .acocollo-celda-hoy {
@@ -465,7 +465,7 @@ export default function Dashboard() {
           position: absolute;
           inset: 0;
           border-radius: inherit;
-          border: 2px solid #2a9d8f;
+          border: 2px solid #d4af37;
           animation: acocolloHoyPulso 1.8s ease-out infinite;
           pointer-events: none;
         }
@@ -503,14 +503,14 @@ export default function Dashboard() {
               style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#2a9d8f" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#d4af37", textShadow: "0 0 12px rgba(212,175,55,.4)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
               <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
-                <p style={{ color: "#2a9d8f", fontSize: 11, marginTop: 0 }}>
+                <p style={{ color: "#d4af37", fontSize: 11, marginTop: 0 }}>
                   Última sincronización: {tiempoRelativo(resumen.ultimaSync.toDate())}
                   {usuarioGoogle && <span style={{ marginLeft: 8, color: "#457b9d" }}>· {usuarioGoogle.email}</span>}
                 </p>
@@ -526,9 +526,9 @@ export default function Dashboard() {
                   fontWeight: 700,
                   padding: "14px 18px",
                   borderRadius: 14,
-                  border: "1.5px solid #2a9d8f",
+                  border: "1.5px solid #d4af37",
                   background: "#1d3557",
-                  color: "#2a9d8f",
+                  color: "#d4af37",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -549,9 +549,9 @@ export default function Dashboard() {
                 fontWeight: 700,
                 padding: "14px 18px",
                 borderRadius: 14,
-                border: "1.5px solid #2a9d8f",
+                border: "1.5px solid #d4af37",
                 background: exportandoGlobal ? "#1d3557" : "#1d3557",
-                color: exportandoGlobal ? "#a8dadc" : "#2a9d8f",
+                color: exportandoGlobal ? "#a8dadc" : "#d4af37",
                 cursor: exportandoGlobal || carpetas.length === 0 ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -571,9 +571,9 @@ export default function Dashboard() {
                 fontWeight: 700,
                 padding: "14px 20px",
                 borderRadius: 14,
-                border: modoPresentacion ? "2px solid #2a9d8f" : "1.5px solid #457b9d",
-                background: modoPresentacion ? "#2a9d8f22" : "#1d3557",
-                color: modoPresentacion ? "#2a9d8f" : "#ffffff",
+                border: modoPresentacion ? "2px solid #d4af37" : "1.5px solid #457b9d",
+                background: modoPresentacion ? "#d4af3722" : "#1d3557",
+                color: modoPresentacion ? "#d4af37" : "#ffffff",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -593,11 +593,11 @@ export default function Dashboard() {
                   fontWeight: 800,
                   padding: "22px 42px",
                   borderRadius: 16,
-                  border: "2px solid #2a9d8f",
-                  background: sincronizando ? "#1d3557" : "linear-gradient(90deg,#2a9d8f33,#26465333)",
-                  color: sincronizando ? "#a8dadc" : "#2a9d8f",
+                  border: "2px solid #d4af37",
+                  background: sincronizando ? "#1d3557" : "linear-gradient(90deg,#d4af3733,#26465333)",
+                  color: sincronizando ? "#a8dadc" : "#d4af37",
                   cursor: sincronizando ? "not-allowed" : "pointer",
-                  boxShadow: sincronizando ? "none" : "0 0 28px rgba(42,157,143,.4)",
+                  boxShadow: sincronizando ? "none" : "0 0 28px rgba(212,175,55,.4)",
                   letterSpacing: 0.3,
                 }}
               >
@@ -608,7 +608,7 @@ export default function Dashboard() {
                   style={{
                     fontSize: 11,
                     marginTop: 6,
-                    color: mensajeSync.tipo === "ok" ? "#2a9d8f" : "#e76f51",
+                    color: mensajeSync.tipo === "ok" ? "#d4af37" : "#e76f51",
                   }}
                 >
                   {mensajeSync.texto}
@@ -628,14 +628,14 @@ export default function Dashboard() {
             background: "#1d3557",
             borderRadius: 12,
             padding: "16px 18px",
-            border: "1px solid #2a9d8f44",
+            border: "1px solid #d4af3744",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
-              <span style={{ color: "#2a9d8f" }}>»» </span>AVANCE POR CARPETAS
+              <span style={{ color: "#d4af37" }}>»» </span>AVANCE POR CARPETAS
             </span>
-            <strong style={{ fontSize: 30, color: "#2a9d8f", textShadow: "0 0 18px rgba(42,157,143,.6)" }}>{pct}%</strong>
+            <strong style={{ fontSize: 30, color: "#d4af37", textShadow: "0 0 18px rgba(212,175,55,.6)" }}>{pct}%</strong>
           </div>
           <div style={{ fontSize: 11, color: "#a8dadc", marginBottom: 8 }}>
             {resumen?.completas ?? "–"} de {resumen?.totalFinales ?? "–"} carpetas marcadas como completas
@@ -646,7 +646,7 @@ export default function Dashboard() {
               background: "#101d24",
               borderRadius: 17,
               overflow: "hidden",
-              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #2a9d8f44",
+              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #d4af3744",
             }}
           >
             <div
@@ -655,10 +655,10 @@ export default function Dashboard() {
                 width: `${pct}%`,
                 height: "100%",
                 backgroundImage:
-                  "repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0px, rgba(255,255,255,.2) 9px, transparent 9px, transparent 18px), linear-gradient(90deg,#2a9d8f,#457b9d)",
+                  "repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0px, rgba(255,255,255,.2) 9px, transparent 9px, transparent 18px), linear-gradient(90deg,#d4af37,#2a9d8f)",
                 backgroundSize: "36px 36px, 100% 100%",
                 transition: "width .4s ease",
-                boxShadow: "0 0 22px rgba(42,157,143,.65)",
+                boxShadow: "0 0 22px rgba(212,175,55,.65)",
                 borderRadius: 17,
               }}
             />
@@ -672,14 +672,14 @@ export default function Dashboard() {
             background: "#1d3557",
             borderRadius: 12,
             padding: "16px 18px",
-            border: "1px solid #2a9d8f44",
+            border: "1px solid #d4af3744",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
-              <span style={{ color: "#2a9d8f" }}>»» </span>AVANCE POR ARCHIVOS <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>(más preciso)</span>
+              <span style={{ color: "#d4af37" }}>»» </span>AVANCE POR ARCHIVOS <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>(más preciso)</span>
             </span>
-            <strong style={{ fontSize: 30, color: "#2a9d8f", textShadow: "0 0 18px rgba(42,157,143,.6)" }}>
+            <strong style={{ fontSize: 30, color: "#d4af37", textShadow: "0 0 18px rgba(212,175,55,.6)" }}>
               {resumen?.pctArchivos ?? "–"}%
             </strong>
           </div>
@@ -692,16 +692,16 @@ export default function Dashboard() {
               background: "#101d24",
               borderRadius: 11,
               overflow: "hidden",
-              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #2a9d8f44",
+              boxShadow: "inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 1px #d4af3744",
             }}
           >
             <div
               style={{
                 width: `${resumen?.pctArchivos ?? 0}%`,
                 height: "100%",
-                background: "linear-gradient(90deg,#2a9d8f,#457b9d)",
+                background: "linear-gradient(90deg,#d4af37,#2a9d8f)",
                 transition: "width .4s ease",
-                boxShadow: "0 0 16px rgba(42,157,143,.5)",
+                boxShadow: "0 0 16px rgba(212,175,55,.5)",
                 borderRadius: 11,
               }}
             />
@@ -711,7 +711,7 @@ export default function Dashboard() {
         {/* Contadores con desglose */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 32 }}>
           <Card label="Carpetas finales" value={resumen?.totalFinales ?? "–"} color="#457b9d" grande={modoPresentacion} />
-          <Card label="Completas" value={resumen?.completas ?? "–"} color="#2a9d8f" grande={modoPresentacion} />
+          <Card label="Completas" value={resumen?.completas ?? "–"} color="#d4af37" grande={modoPresentacion} />
           <Card label="Incompletas" value={resumen?.incompletas ?? "–"} color="#f4a261" grande={modoPresentacion} />
           <Card label="Vacías" value={resumen?.vacias ?? "–"} color="#e76f51" grande={modoPresentacion} />
         </div>
@@ -734,9 +734,9 @@ export default function Dashboard() {
                   fontSize: 11,
                   padding: "5px 12px",
                   borderRadius: 16,
-                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#2a9d8f" : "#457b9d"}`,
-                  background: rangoDiasHeatmap === btn.val ? "#2a9d8f33" : "#1d3557",
-                  color: rangoDiasHeatmap === btn.val ? "#2a9d8f" : "#a8dadc",
+                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#d4af37" : "#457b9d"}`,
+                  background: rangoDiasHeatmap === btn.val ? "#d4af3733" : "#1d3557",
+                  color: rangoDiasHeatmap === btn.val ? "#d4af37" : "#a8dadc",
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -791,7 +791,7 @@ export default function Dashboard() {
         {modoPresentacion && areas.length > 0 && (
           <div className="acocollo-fade-in acocollo-modo-transicion" style={{ marginTop: 36 }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: "#ffffff", marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#2a9d8f" }}>»» </span>AVANCE POR ESPECIALIDAD, POR ÁREA
+              <span style={{ color: "#d4af37" }}>»» </span>AVANCE POR ESPECIALIDAD, POR ÁREA
             </div>
             {areas.map((a) => {
               const especialidadesDelArea = especialidadPorArea[a] || {};
@@ -941,7 +941,7 @@ export default function Dashboard() {
                 area="Todas"
                 pct={resumen?.pctArchivos ?? 0}
                 total={resumen?.totalFinales ?? 0}
-                color="#2a9d8f"
+                color="#d4af37"
                 active={filtroArea === "Todas"}
                 onClick={() => setFiltroArea("Todas")}
               />
@@ -968,8 +968,8 @@ export default function Dashboard() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
-            {/* BOTONES DE FILTRO Y CONTROL AMPLIADOS 200% */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+            {/* BOTONES DE FILTRO Y CONTROL CON TAMAÑO EQUILIBRADO (-50% del anterior) */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {ESTADO_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -981,7 +981,7 @@ export default function Dashboard() {
               ))}
               <button
                 onClick={() => setColapsados((prev) => ({ ...prev, __all: !prev.__all }))}
-                style={{ ...chipStyle(false, "#a8dadc"), fontWeight: 800 }}
+                style={{ ...chipStyle(false, "#a8dadc"), fontWeight: 700 }}
               >
                 {colapsados.__all ? "▸ Expandir todo" : "▾ Colapsar todo"}
               </button>
@@ -994,7 +994,7 @@ export default function Dashboard() {
                 background: "#121e25",
                 borderRadius: 12,
                 overflow: "hidden",
-                border: "1px solid #2a9d8f44",
+                border: "1px solid #d4af3744",
               }}
             >
               {visibles.length === 0 && (
@@ -1046,8 +1046,8 @@ export default function Dashboard() {
                         style={{
                           padding: "12px 16px 12px 14px",
                           background: "#1d3557",
-                          borderLeft: `5px solid ${vaciasGrupo > 0 ? "#e76f51" : tienePendientes ? "#f4a261" : "#2a9d8f"}`,
-                          borderTop: "1px solid #2a9d8f33",
+                          borderLeft: `5px solid ${vaciasGrupo > 0 ? "#e76f51" : tienePendientes ? "#f4a261" : "#d4af37"}`,
+                          borderTop: "1px solid #d4af3733",
                           borderBottom: "1px solid #101d24",
                           display: "flex",
                           alignItems: "baseline",
@@ -1062,7 +1062,7 @@ export default function Dashboard() {
                         <span style={{ fontSize: 11.5, fontWeight: 800, color: "#a8dadc", textTransform: "uppercase", letterSpacing: 0.5 }}>
                           {g.area}
                         </span>
-                        <span style={{ color: "#2a9d8f", fontSize: 12 }}>›</span>
+                        <span style={{ color: "#d4af37", fontSize: 12 }}>›</span>
                         <span style={{ fontSize: 14.5, fontWeight: 800, color: "#ffffff", textShadow: "0 1px 2px rgba(0,0,0,.5)" }}>{g.especialidad}</span>
                         <span style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
                           <MiniDona completas={g.items.length - pendientesGrupo} total={g.items.length} />
@@ -1107,8 +1107,8 @@ export default function Dashboard() {
                                   fontSize: 10,
                                   padding: "2px 8px",
                                   borderRadius: 20,
-                                  background: (ESTADO_COLOR[c.estado] || "#2a9d8f") + "33",
-                                  color: ESTADO_COLOR[c.estado] || "#2a9d8f",
+                                  background: (ESTADO_COLOR[c.estado] || "#d4af37") + "33",
+                                  color: ESTADO_COLOR[c.estado] || "#d4af37",
                                   textTransform: "uppercase",
                                   fontWeight: 700,
                                   whiteSpace: "nowrap",
@@ -1123,14 +1123,14 @@ export default function Dashboard() {
                                 style={{
                                   marginTop: 6,
                                   padding: "6px 10px",
-                                  background: "#2a9d8f1c",
-                                  border: "1px solid #2a9d8f44",
+                                  background: "#d4af371c",
+                                  border: "1px solid #d4af3744",
                                   borderRadius: 8,
                                   fontSize: 11,
                                   color: "#a8dadc",
                                 }}
                               >
-                                ✓ Marcada por <strong style={{ color: "#2a9d8f" }}>{c.marcadoPor || "alguien"}</strong>
+                                ✓ Marcada por <strong style={{ color: "#d4af37" }}>{c.marcadoPor || "alguien"}</strong>
                               </div>
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
@@ -1145,7 +1145,7 @@ export default function Dashboard() {
                                   fontSize: 10,
                                   padding: "3px 9px",
                                   borderRadius: 20,
-                                  border: c.forzada ? "1px solid #e76f5188" : "1px solid #2a9d8f88",
+                                  border: c.forzada ? "1px solid #e76f5188" : "1px solid #d4af3788",
                                   background: "transparent",
                                   color: marcandoId === c.id ? "#457b9d" : c.forzada ? "#a8dadc" : "#ffffff",
                                   cursor: marcandoId === c.id ? "not-allowed" : "pointer",
@@ -1174,14 +1174,14 @@ export default function Dashboard() {
                 borderRadius: 12,
                 maxHeight: 480,
                 overflowY: "auto",
-                border: "1px solid #2a9d8f44",
+                border: "1px solid #d4af3744",
               }}
             >
               {eventos.length === 0 && (
                 <p style={{ padding: 16, color: "#a8dadc" }}>Sin eventos todavía.</p>
               )}
               {eventos.map((e) => {
-                const color = EVENTO_COLOR[e.tipo] || "#2a9d8f";
+                const color = EVENTO_COLOR[e.tipo] || "#d4af37";
                 const icono = EVENTO_ICONO[e.tipo] || "•";
                 const fecha = e.timestamp?.toDate ? e.timestamp.toDate() : null;
                 return (
@@ -1251,7 +1251,7 @@ export default function Dashboard() {
             className="acocollo-fade-in"
             style={{
               background: "#1d3557",
-              border: "1px solid #2a9d8f",
+              border: "1px solid #d4af37",
               borderRadius: 16,
               width: "min(1100px, 100%)",
               maxHeight: "85vh",
@@ -1266,7 +1266,7 @@ export default function Dashboard() {
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "20px 26px",
-                borderBottom: "1px solid #2a9d8f44",
+                borderBottom: "1px solid #d4af3744",
               }}
             >
               <div style={{ fontSize: 19, fontWeight: 700, color: "#ffffff" }}>
@@ -1300,7 +1300,7 @@ export default function Dashboard() {
                       padding: "16px 18px",
                       marginBottom: 12,
                       background: "#101d24",
-                      border: "1px solid #2a9d8f44",
+                      border: "1px solid #d4af3744",
                       borderRadius: 10,
                     }}
                   >
@@ -1359,7 +1359,7 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
               }}
             >
               {p}
-              {esUltimo && <span style={{ color: "#2a9d8f", marginLeft: 4 }}>↗</span>}
+              {esUltimo && <span style={{ color: "#d4af37", marginLeft: 4 }}>↗</span>}
             </span>
           </span>
         );
@@ -1374,7 +1374,7 @@ function EspecialidadMiniCard({ nombre, pct, total, incompletas = 0, vacias = 0,
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (pct / 100) * circumference;
-  const color = pct >= 100 ? "#2a9d8f" : pct >= 50 ? "#f4a261" : "#e76f51";
+  const color = pct >= 100 ? "#d4af37" : pct >= 50 ? "#f4a261" : "#e76f51";
 
   return (
     <div
@@ -1387,7 +1387,7 @@ function EspecialidadMiniCard({ nombre, pct, total, incompletas = 0, vacias = 0,
         padding: "18px 12px",
         borderRadius: 12,
         background: "#1d3557",
-        border: "1px solid #2a9d8f44",
+        border: "1px solid #d4af3744",
         animationDelay: `${delay}ms`,
       }}
     >
@@ -1441,7 +1441,7 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
         gap: Math.round(size * 0.05),
         padding: "18px 14px",
         borderRadius: 14,
-        border: `2px solid ${active ? color : "#2a9d8f44"}`,
+        border: `2px solid ${active ? color : "#d4af3744"}`,
         background: active ? color + "22" : "#1d3557",
         cursor: "pointer",
         transition: "all .15s ease",
@@ -1480,23 +1480,23 @@ function AreaMiniCard({ area, pct, total, incompletas = 0, vacias = 0, color, ac
   );
 }
 
-/* PANEL DE DATOS DE CARPETA MADRE / ÁREA CON TAMAÑO AMPLIADO 300% */
+/* PANEL DE DATOS DE CARPETA MADRE / ÁREA CON TAMAÑO AJUSTADO Y DORADO */
 function AreaProgressPanel({ area, stats, color }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "#1d3557", border: `2px solid ${color}88`, borderRadius: 14, padding: "24px 28px", marginBottom: 16, boxShadow: `0 4px 20px rgba(0,0,0,.4)` }}>
-      <div style={{ fontSize: 20, fontWeight: 800, color, textTransform: "uppercase", letterSpacing: 0.5 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, background: "#1d3557", border: `2px solid #d4af3788`, borderRadius: 12, padding: "18px 22px", marginBottom: 14, boxShadow: `0 4px 16px rgba(0,0,0,.4)` }}>
+      <div style={{ fontSize: 16, fontWeight: 800, color: "#d4af37", textTransform: "uppercase", letterSpacing: 0.5 }}>
         {area}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, color: "#ffffff", lineHeight: 1.3 }}>
-        <span style={{ color: "#2a9d8f", fontWeight: 900 }}>{stats.completas}</span> completas de <strong style={{ color: "#ffffff" }}>{stats.total}</strong> carpetas
+      <div style={{ fontSize: 20, fontWeight: 700, color: "#ffffff", lineHeight: 1.3 }}>
+        <span style={{ color: "#d4af37", fontWeight: 800 }}>{stats.completas}</span> completas de <strong style={{ color: "#ffffff" }}>{stats.total}</strong> carpetas
       </div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: "#a8dadc", display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ fontSize: 15, fontWeight: 600, color: "#a8dadc", display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
         <span>
-          <strong style={{ color: "#f4a261", fontWeight: 900, fontSize: 25 }}>{stats.incompletas}</strong> incompletas
+          <strong style={{ color: "#f4a261", fontWeight: 700, fontSize: 17 }}>{stats.incompletas}</strong> incompletas
         </span>
         <span>·</span>
         <span>
-          <strong style={{ color: "#e76f51", fontWeight: 900, fontSize: 25 }}>{stats.vacias}</strong> vacías
+          <strong style={{ color: "#e76f51", fontWeight: 700, fontSize: 17 }}>{stats.vacias}</strong> vacías
         </span>
       </div>
     </div>
@@ -1510,7 +1510,7 @@ function MiniDona({ completas, total }) {
   const circumference = 2 * Math.PI * radius;
   const pct = total > 0 ? completas / total : 0;
   const offset = circumference - pct * circumference;
-  const color = pct >= 1 ? "#2a9d8f" : pct > 0 ? "#f4a261" : "#e76f51";
+  const color = pct >= 1 ? "#d4af37" : pct > 0 ? "#f4a261" : "#e76f51";
 
   return (
     <svg width={size} height={size}>
@@ -1531,18 +1531,18 @@ function MiniDona({ completas, total }) {
   );
 }
 
-/* ESTILOS DE CHIP DE FILTRO AMPLIADOS 200% */
+/* CHIPS DE FILTRO CON TAMAÑO EQUILIBRADO (-50%) */
 function chipStyle(active, color) {
   return {
-    fontSize: 16,
-    padding: "12px 22px",
-    borderRadius: 30,
-    border: `2px solid ${active ? color : "#457b9d"}`,
+    fontSize: 13,
+    padding: "8px 16px",
+    borderRadius: 24,
+    border: `1.5px solid ${active ? color : "#457b9d"}`,
     background: active ? color + "33" : "#1d3557",
     color: active ? color : "#a8dadc",
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: "pointer",
-    boxShadow: active ? `0 0 14px ${color}66` : "none",
+    boxShadow: active ? `0 0 10px ${color}55` : "none",
   };
 }
 
@@ -1618,7 +1618,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
     <div
       style={{
         background: "#1d3557",
-        border: "1px solid #2a9d8f44",
+        border: "1px solid #d4af3744",
         borderRadius: 12,
         padding: grande ? "28px 32px" : "16px 18px",
       }}
@@ -1658,7 +1658,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
                   const y = paddingArriba + altoLinea - paddingArriba - (v / 100) * (altoLinea - paddingArriba * 2);
                   return (
                     <g key={v}>
-                      <line x1={paddingIzq - 10} y1={y} x2={ancho - paddingDer} y2={y} stroke="#2a9d8f33" strokeWidth="1" strokeDasharray="3,4" />
+                      <line x1={paddingIzq - 10} y1={y} x2={ancho - paddingDer} y2={y} stroke="#d4af3733" strokeWidth="1" strokeDasharray="3,4" />
                       <text x={paddingIzq - 16} y={y + 4} textAnchor="end" fontSize={grande ? 14 : 12} fill="#a8dadc" fontWeight="600">
                         {v}%
                       </text>
@@ -1666,31 +1666,31 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
                   );
                 })}
 
-                <path d={pathArea} fill="url(#tendenciaGradientTeal)" opacity="0.4" />
+                <path d={pathArea} fill="url(#tendenciaGradientGold)" opacity="0.4" />
                 <path
                   d={pathLinea}
                   fill="none"
-                  stroke="#2a9d8f"
+                  stroke="#d4af37"
                   strokeWidth={grande ? "4.5" : "3.5"}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
                 {puntos.map((p, i) => (
-                  <circle key={i} cx={p.x} cy={p.y} r={i === puntos.length - 1 ? (grande ? 7 : 5.5) : (grande ? 5 : 3.5)} fill="#2a9d8f" />
+                  <circle key={i} cx={p.x} cy={p.y} r={i === puntos.length - 1 ? (grande ? 7 : 5.5) : (grande ? 5 : 3.5)} fill="#d4af37" />
                 ))}
 
                 <defs>
-                  <linearGradient id="tendenciaGradientTeal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2a9d8f" />
+                  <linearGradient id="tendenciaGradientGold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#d4af37" />
                     <stop offset="100%" stopColor="#1d3557" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
-                <text x={puntos[puntos.length - 1].x} y={puntos[puntos.length - 1].y - 14} textAnchor="end" fontSize={grande ? 18 : 15} fontWeight="700" fill="#2a9d8f">
+                <text x={puntos[puntos.length - 1].x} y={puntos[puntos.length - 1].y - 14} textAnchor="end" fontSize={grande ? 18 : 15} fontWeight="700" fill="#d4af37">
                   {puntos[puntos.length - 1].pct}%
                 </text>
 
-                <line x1={paddingIzq - 10} y1={altoLinea + 8} x2={ancho - paddingDer} y2={altoLinea + 8} stroke="#2a9d8f44" strokeWidth="1" />
+                <line x1={paddingIzq - 10} y1={altoLinea + 8} x2={ancho - paddingDer} y2={altoLinea + 8} stroke="#d4af3744" strokeWidth="1" />
                 <text x={paddingIzq} y={altoLinea + 18} fontSize={grande ? 12 : 11} fill="#a8dadc" fontWeight="700">
                   INCIDENCIAS DEL DRIVE POR DÍA
                 </text>
@@ -1704,7 +1704,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
                       width="8"
                       height={alturaBarrita}
                       rx="2"
-                      fill={p.incidencias > 0 ? "#2a9d8f" : "#457b9d66"}
+                      fill={p.incidencias > 0 ? "#d4af37" : "#457b9d66"}
                     />
                   );
                 })}
@@ -1776,7 +1776,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
 
   function intensidad(count) {
     if (count === 0) return "#101d24";
-    if (count >= 11) return "#2a9d8f";
+    if (count >= 11) return "#d4af37";
     if (count >= 4) return "#457b9d";
     return "#f4a261";
   }
@@ -1818,7 +1818,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
     <div
       style={{
         background: "#1d3557",
-        border: "1px solid #2a9d8f44",
+        border: "1px solid #d4af3744",
         borderRadius: 12,
         padding: grande ? "22px 26px" : "16px 18px",
         overflowX: "auto",
@@ -1869,9 +1869,9 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                       width: 28,
                       height: 28,
                       borderRadius: "50%",
-                      background: (EVENTO_COLOR[tipo] || "#2a9d8f") + "33",
-                      border: `1.5px solid ${EVENTO_COLOR[tipo] || "#2a9d8f"}`,
-                      color: EVENTO_COLOR[tipo] || "#2a9d8f",
+                      background: (EVENTO_COLOR[tipo] || "#d4af37") + "33",
+                      border: `1.5px solid ${EVENTO_COLOR[tipo] || "#d4af37"}`,
+                      color: EVENTO_COLOR[tipo] || "#d4af37",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -1899,7 +1899,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
             top: tooltipPos ? tooltipPos.top : tooltip.anclaY,
             visibility: tooltipPos ? "visible" : "hidden",
             background: "#1d3557",
-            border: "1px solid #2a9d8f",
+            border: "1px solid #d4af37",
             color: "#ffffff",
             padding: "8px 12px",
             borderRadius: 7,
@@ -1934,7 +1934,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
             className="acocollo-fade-in"
             style={{
               background: "#1d3557",
-              border: "1px solid #2a9d8f",
+              border: "1px solid #d4af37",
               borderRadius: 16,
               width: "min(750px, 100%)",
               maxHeight: "85vh",
@@ -1949,7 +1949,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "20px 26px",
-                borderBottom: "1px solid #2a9d8f44",
+                borderBottom: "1px solid #d4af3744",
               }}
             >
               <div>
@@ -1987,7 +1987,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {eventosDelDia.map((ev) => {
-                    const color = EVENTO_COLOR[ev.tipo] || "#2a9d8f";
+                    const color = EVENTO_COLOR[ev.tipo] || "#d4af37";
                     const icono = EVENTO_ICONO[ev.tipo] || "•";
                     const fechaEv = ev.timestamp?.toDate ? ev.timestamp.toDate() : null;
                     const horaStr = fechaEv ? fechaEv.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
@@ -1996,7 +1996,7 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                         key={ev.id}
                         style={{
                           background: "#101d24",
-                          border: "1px solid #2a9d8f44",
+                          border: "1px solid #d4af3744",
                           borderRadius: 10,
                           padding: "12px 16px",
                           display: "flex",
@@ -2024,14 +2024,14 @@ function ActividadHeatmap({ actividadPorDia, diasCustom = 84, grande }) {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 14, color: "#ffffff" }}>
-                            <strong>{ev.usuario || "Usuario"}</strong> <span style={{ color }}>{EVENTO_LABEL[ev.tipo] || ev.tipo}</span> <strong style={{ color: "#2a9d8f" }}>{ev.item}</strong>
+                            <strong>{ev.usuario || "Usuario"}</strong> <span style={{ color }}>{EVENTO_LABEL[ev.tipo] || ev.tipo}</span> <strong style={{ color: "#d4af37" }}>{ev.item}</strong>
                           </div>
                           {ev.ruta && (
                             <div style={{ fontSize: 12, color: "#a8dadc", marginTop: 3, wordBreak: "break-all" }}>
                               📁 {ev.ruta}
                             </div>
                           )}
-                          <div style={{ fontSize: 11, color: "#2a9d8f", marginTop: 6, display: "flex", justifyContent: "space-between" }}>
+                          <div style={{ fontSize: 11, color: "#d4af37", marginTop: 6, display: "flex", justifyContent: "space-between" }}>
                             <span>{ev.tipo}</span>
                             <span>{horaStr}</span>
                           </div>
