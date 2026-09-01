@@ -374,7 +374,7 @@ export default function Dashboard() {
   const areaLabel = filtroArea !== "Todas" ? ` · ${filtroArea}` : "";
 
   return (
-    <div className="acocollo-fondo-animado" style={{ minHeight: "100vh", width: "100%" }}>
+    <div className="acocollo-fondo-animado" style={{ minHeight: "100vh", width: "100%", paddingBottom: 60 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -413,10 +413,17 @@ export default function Dashboard() {
           box-shadow: 0 6px 25px rgba(0,0,0,.7);
         }
         .acocollo-fade-in {
-          animation: acocolloFadeIn .28s ease both;
+          animation: acocolloFadeIn .32s cubic-bezier(.16,1,.3,1) both;
         }
         @keyframes acocolloFadeIn {
-          from { opacity: 0; transform: translateY(6px); }
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .acocollo-stagger-item {
+          animation: acocolloStaggerAnim .35s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes acocolloStaggerAnim {
+          from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         .acocollo-barra-avance {
@@ -427,18 +434,25 @@ export default function Dashboard() {
           to   { background-position: 36px 0, 0 0; }
         }
         .acocollo-fondo-animado button:not(:disabled) {
-          transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+          transition: transform .18s cubic-bezier(.2,.8,.2,1), filter .18s ease, box-shadow .18s ease;
         }
         .acocollo-fondo-animado button:not(:disabled):hover {
-          transform: translateY(-1.5px) scale(1.015);
-          filter: brightness(1.15);
+          transform: translateY(-2px) scale(1.02);
+          filter: brightness(1.18);
+          box-shadow: 0 6px 20px rgba(229,184,11,.3);
         }
         .acocollo-fondo-animado button:not(:disabled):active {
-          transform: translateY(0) scale(0.98);
+          transform: translateY(0) scale(0.97);
           filter: brightness(0.95);
         }
         .acocollo-tarjeta-viva {
           animation: acocolloTarjetaEntrada .5s cubic-bezier(.25,.9,.35,1.25) both;
+          transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .acocollo-tarjeta-viva:hover {
+          transform: translateY(-3px);
+          border-color: #e5b80b !important;
+          box-shadow: 0 8px 25px rgba(229,184,11,.25) !important;
         }
         @keyframes acocolloTarjetaEntrada {
           from { opacity: 0; transform: translateY(10px) scale(.96); }
@@ -479,6 +493,13 @@ export default function Dashboard() {
         @keyframes acocolloModoEntrada {
           from { opacity: 0; transform: scale(.985); }
           to   { opacity: 1; transform: scale(1); }
+        }
+        .acocollo-barra-flotante {
+          animation: acocolloFlotarIn .3s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes acocolloFlotarIn {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to   { opacity: 1; transform: translate(-50%, 0); }
         }
       `}</style>
 
@@ -1036,14 +1057,18 @@ export default function Dashboard() {
                 }
                 ordenGrupos.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
 
-                return ordenGrupos.map((key) => {
+                return ordenGrupos.map((key, grupoIndex) => {
                   const g = grupos[key];
                   const pendientesGrupo = g.items.filter((c) => c.estado !== "completa").length;
                   const vaciasGrupo = g.items.filter((c) => c.estado === "vacia").length;
                   const tienePendientes = pendientesGrupo > 0;
                   const grupoColapsado = colapsados.__all ? !colapsados[key] : !!colapsados[key];
                   return (
-                    <div key={key}>
+                    <div 
+                      key={key} 
+                      className="acocollo-stagger-item"
+                      style={{ animationDelay: `${grupoIndex * 35}ms` }}
+                    >
                       <div
                         onClick={() => toggleGrupo(key)}
                         style={{
@@ -1102,17 +1127,20 @@ export default function Dashboard() {
                           </span>
                         </span>
                       </div>
-                      {!grupoColapsado && g.items.map((c) => {
+                      {!grupoColapsado && g.items.map((c, itemIndex) => {
                         const detalle = c.detalle || c.estado;
                         const driveUrl = `https://drive.google.com/drive/folders/${c.id}`;
                         return (
                           <div
                             key={c.id}
+                            className="acocollo-stagger-item"
                             onClick={() => window.open(driveUrl, "_blank", "noopener,noreferrer")}
                             style={{
                               padding: "12px 16px 12px 24px",
                               borderBottom: "1px solid #1a2533",
                               cursor: "pointer",
+                              animationDelay: `${(grupoIndex * 35) + (itemIndex * 20)}ms`,
+                              transition: "background .15s ease",
                             }}
                             onMouseEnter={(e) => (e.currentTarget.style.background = "#1b2736")}
                             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -1249,6 +1277,65 @@ export default function Dashboard() {
 
       </div>
 
+      {/* BARRA DE ACCIONES FLOTANTE INTELIGENTE */}
+      <div
+        className="acocollo-barra-flotante"
+        style={{
+          position: "fixed",
+          bottom: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 50,
+          background: "rgba(20, 28, 36, 0.92)",
+          backdropFilter: "blur(16px)",
+          border: "2px solid #e5b80b",
+          borderRadius: 32,
+          padding: "10px 22px",
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          boxShadow: "0 10px 35px rgba(0,0,0,0.7), 0 0 20px rgba(229,184,11,0.25)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "#ffffff" }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#e5b80b", boxShadow: "0 0 8px #e5b80b" }} />
+          <span>Filtro activo: <strong style={{ color: "#e5b80b" }}>{ESTADO_FILTRO_LABEL[filtroEstado]}</strong></span>
+        </div>
+        <div style={{ width: 1, height: 18, background: "#457b9d" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{
+              background: "transparent",
+              border: "1.5px solid #457b9d",
+              color: "#a8dadc",
+              fontSize: 12,
+              fontWeight: 600,
+              padding: "6px 14px",
+              borderRadius: 20,
+              cursor: "pointer",
+            }}
+          >
+            ↑ Ir arriba
+          </button>
+          <button
+            onClick={() => setColapsados((prev) => ({ ...prev, __all: !prev.__all }))}
+            style={{
+              background: "#e5b80b",
+              border: "none",
+              color: "#0c1015",
+              fontSize: 12,
+              fontWeight: 800,
+              padding: "6px 14px",
+              borderRadius: 20,
+              cursor: "pointer",
+            }}
+          >
+            {colapsados.__all ? "Expandir todo" : "Colapsar todo"}
+          </button>
+        </div>
+      </div>
+
       {mostrarMarcadas && (
         <div
           onClick={() => setMostrarMarcadas(false)}
@@ -1373,7 +1460,6 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
               style={{
                 fontSize: esUltimo ? 14.5 : 12,
                 fontWeight: esUltimo ? 800 : 600,
-                // LAS SUBCARPETAS REGRESAN A SU COLOR SUAVE/BLANCO LIMPIO
                 color: esUltimo ? "#ffffff" : "#e5b80b",
                 background: "transparent",
                 padding: 0,
