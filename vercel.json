@@ -1,0 +1,9 @@
+{
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/sync?secret=chijnaya-sync-2026-x7Kp9mQ2wR",
+      "schedule": "0 15 * * *"
+    }
+  ]
+}
