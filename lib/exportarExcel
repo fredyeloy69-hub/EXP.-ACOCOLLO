@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { LOGO_PUNO_BASE64 } from "@/lib/logoPuno";
 
 const ESTADO_LABEL = {
   completa: "COMPLETA",
@@ -17,16 +18,14 @@ const NARANJA = "FFE67E22";
 
 /**
  * Genera y descarga un Excel (.xlsx) con formato real — encabezado institucional,
- * jerarquía de hasta 5 niveles de carpetas (igual que el PDF), colores por estado,
- * bordes y columnas ajustadas. Reemplaza la versión anterior que solo llenaba
- * celdas sin ningún formato (la librería "xlsx" no soporta estilos al escribir).
+ * logo, nombre del proyecto, jerarquía de carpetas, colores por estado y bordes.
  *
  * @param {string} areaNombre - nombre del área a exportar
  * @param {Array} carpetasDelArea - carpetas (ya filtradas a esa área)
  */
 export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Visor Chijnaya";
+  workbook.creator = "Visor Acocollo I-2";
   workbook.created = new Date();
 
   const nombreHoja = areaNombre.replace(/[\\/*?:[\]]/g, "").slice(0, 31) || "Reporte";
@@ -41,44 +40,71 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     { width: 55 },
   ];
 
+  // --- Insertar logo institucional ---
+  if (LOGO_PUNO_BASE64) {
+    try {
+      const base64Data = LOGO_PUNO_BASE64.includes("base64,")
+        ? LOGO_PUNO_BASE64.split("base64,")[1]
+        : LOGO_PUNO_BASE64;
+      const imageId = workbook.addImage({
+        base64: base64Data,
+        extension: "png",
+      });
+      sheet.addImage(imageId, {
+        tl: { col: 0.2, row: 0.2 },
+        ext: { width: 45, height: 50 },
+      });
+    } catch (e) {
+      console.error("No se pudo cargar el logo en el Excel:", e);
+    }
+  }
+
   // --- Encabezado institucional ---
   sheet.mergeCells("A1:D1");
   sheet.getCell("A1").value = "GOBIERNO REGIONAL DE PUNO — GERENCIA REGIONAL DE INFRAESTRUCTURA";
-  sheet.getCell("A1").font = { bold: true, size: 12 };
+  sheet.getCell("A1").font = { bold: true, size: 11 };
   sheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(1).height = 20;
+  sheet.getRow(1).height = 18;
 
   sheet.mergeCells("A2:D2");
   sheet.getCell("A2").value = "SUB GERENCIA DE ESTUDIOS DEFINITIVOS";
   sheet.getCell("A2").font = { bold: true, size: 10 };
   sheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+  sheet.getRow(2).height = 16;
 
   sheet.mergeCells("A3:D3");
-  const celdaTitulo = sheet.getCell("A3");
+  sheet.getCell("A3").value = "PROYECTO: C.S. ACOCOLLO - I-2";
+  sheet.getCell("A3").font = { bold: true, size: 11, color: { argb: "FFC0392B" } };
+  sheet.getCell("A3").alignment = { horizontal: "center", vertical: "middle" };
+  sheet.getRow(3).height = 18;
+
+  sheet.mergeCells("A4:D4");
+  const celdaTitulo = sheet.getCell("A4");
   celdaTitulo.value = `REPORTE DE AVANCE — ${areaNombre.toUpperCase()}`;
-  celdaTitulo.font = { bold: true, size: 13, color: { argb: "FFFFFFFF" } };
+  celdaTitulo.font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   celdaTitulo.alignment = { horizontal: "center", vertical: "middle" };
   celdaTitulo.fill = { type: "pattern", pattern: "solid", fgColor: { argb: AZUL_OSCURO } };
-  sheet.getRow(3).height = 24;
+  sheet.getRow(4).height = 22;
 
   const total = carpetasDelArea.length;
   const completas = carpetasDelArea.filter((c) => c.estado === "completa").length;
   const incompletas = carpetasDelArea.filter((c) => c.estado === "incompleta").length;
   const vacias = carpetasDelArea.filter((c) => c.estado === "vacia").length;
 
-  sheet.mergeCells("A4:B4");
-  sheet.getCell("A4").value = `Generado: ${new Date().toLocaleString("es-PE")}`;
-  sheet.getCell("A4").font = { italic: true, size: 9, color: { argb: "FF666666" } };
+  sheet.mergeCells("A5:B5");
+  sheet.getCell("A5").value = `Generado: ${new Date().toLocaleString("es-PE")}`;
+  sheet.getCell("A5").font = { italic: true, size: 9, color: { argb: "FF666666" } };
 
-  sheet.mergeCells("C4:D4");
-  sheet.getCell("C4").value = `Total: ${total}  ·  Completas: ${completas}  ·  Incompletas: ${incompletas}  ·  Vacías: ${vacias}`;
-  sheet.getCell("C4").font = { italic: true, size: 9, color: { argb: "FF666666" } };
-  sheet.getCell("C4").alignment = { horizontal: "right" };
+  sheet.mergeCells("C5:D5");
+  sheet.getCell("C5").value = `Total: ${total}  ·  Completas: ${completas}  ·  Incompletas: ${incompletas}  ·  Vacías: ${vacias}`;
+  sheet.getCell("C5").font = { italic: true, size: 9, color: { argb: "FF666666" } };
+  sheet.getCell("C5").alignment = { horizontal: "right" };
+  sheet.getRow(5).height = 16;
 
-  sheet.addRow([]); // fila 5 en blanco, de separación
+  sheet.addRow([]); // fila 6 en blanco, de separación
 
-  // --- Encabezado de columnas de la tabla (fila 6) ---
-  const FILA_ENCABEZADO = 6;
+  // --- Encabezado de columnas de la tabla (fila 7) ---
+  const FILA_ENCABEZADO = 7;
   const filaEncabezado = sheet.getRow(FILA_ENCABEZADO);
   filaEncabezado.values = ["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"];
   filaEncabezado.eachCell((cell) => {
@@ -89,7 +115,7 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
   });
   filaEncabezado.height = 18;
 
-  // --- Agrupar por especialidad, igual que en el PDF ---
+  // --- Agrupar por especialidad ---
   const grupos = {};
   const ordenGrupos = [];
   for (const c of carpetasDelArea) {
@@ -109,9 +135,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
 
   let contadorFila = 1;
 
-  // Mezcla el naranja con blanco según un factor (0 = naranja puro, 1 = blanco puro) —
-  // mismo criterio de degradé que el PDF, para que la carpeta madre sea la más
-  // nítida y cada nivel más profundo se vea más pálido.
   function mezclarConBlanco(hexRgb, factor) {
     const r = parseInt(hexRgb.slice(2, 4), 16);
     const g = parseInt(hexRgb.slice(4, 6), 16);
@@ -120,8 +143,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     return `FF${mezcla(r)}${mezcla(g)}${mezcla(b)}`;
   }
 
-  // Colores de fondo para las carpetas FINALES (las filas con COMPLETA/INCOMPLETA/VACÍA),
-  // no solo los encabezados de subcarpeta — mientras más profundo el nivel, más pálido.
   const FACTORES_HOJA = [0.72, 0.80, 0.86, 0.90, 0.93];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min((nivelVisual || 1) - 1, FACTORES_HOJA.length - 1)];
@@ -133,7 +154,7 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     sheet.mergeCells(`A${fila.number}:D${fila.number}`);
     const celda = fila.getCell(1);
     const esNivel1 = nivel === 1;
-    const factoresPorNivel = [0, 0.45, 0.65, 0.82]; // nivel 1 = naranja puro, luego cada vez más pálido
+    const factoresPorNivel = [0, 0.45, 0.65, 0.82];
     const factor = factoresPorNivel[Math.min(nivel - 1, factoresPorNivel.length - 1)];
     celda.font = { bold: true, size: esNivel1 ? 13 : 11, color: { argb: esNivel1 ? "FFFFFFFF" : "FF4A2D0F" } };
     celda.fill = {
@@ -141,7 +162,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
       pattern: "solid",
       fgColor: { argb: mezclarConBlanco(NARANJA, factor) },
     };
-    // Sangría NATIVA de Excel (no espacios de texto) — cada nivel más adentro que el anterior, tipo escalera
     celda.alignment = { horizontal: "left", vertical: "middle", indent: Math.max(0, nivel - 1) * 2 };
     fila.height = esNivel1 ? 20 : 17;
   }
@@ -153,7 +173,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     const fondo = colorHoja(nivelVisual);
 
     fila.getCell(1).alignment = { horizontal: "center", vertical: "top" };
-    // Sangría nativa también en las filas finales, según qué tan adentro estén en el ramal
     fila.getCell(2).alignment = { wrapText: true, vertical: "top", indent: Math.max(0, (nivelVisual || 1) - 1) * 2 };
     fila.getCell(3).font = { bold: true, color: { argb: ESTADO_COLOR[estado] || "FF666666" } };
     fila.getCell(3).alignment = { horizontal: "center", vertical: "top" };
@@ -170,8 +189,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     });
   }
 
-  // Agrupación recursiva hasta 5 niveles totales (especialidad + 3 intermedios + ítem final),
-  // ordenada numéricamente en cada nivel — igual criterio que en el PDF.
   const NIVEL_MAX_INTERMEDIO = 4;
   function agruparRecursivo(items, nivelIdxRuta, nivelVisual) {
     if (nivelIdxRuta > NIVEL_MAX_INTERMEDIO) {
@@ -186,7 +203,7 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
       const partes = (c.ruta || c.nombre || "").split(" / ").filter(Boolean);
       const clave = partes.length > nivelIdxRuta + 1 ? partes[nivelIdxRuta] : null;
       if (clave) hayNivelMasProfundo = true;
-      const key = clave || `__directo__${c.nombre || c.id}`; // clave única por ítem suelto
+      const key = clave || `__directo__${c.nombre || c.id}`;
       if (!subgrupos[key]) subgrupos[key] = [];
       subgrupos[key].push(c);
     }
@@ -197,8 +214,6 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
       return;
     }
 
-    // Cada entrada (ítem suelto o subgrupo) se ordena por SU PROPIO nombre, todas
-    // juntas — antes los ítems sueltos salían todos primero sin importar numeración.
     const entradas = Object.keys(subgrupos).map((key) => ({
       key,
       nombreOrden: key.startsWith("__directo__") ? subgrupos[key][0].nombre || "" : key,
@@ -222,10 +237,8 @@ export async function generarReporteExcelPorArea(areaNombre, carpetasDelArea) {
     agruparRecursivo(grupos[especialidad], 2, 2);
   }
 
-  // Fija el encabezado de columnas al hacer scroll
   sheet.views = [{ state: "frozen", ySplit: FILA_ENCABEZADO }];
 
-  // --- Descargar ---
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
