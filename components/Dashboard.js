@@ -510,37 +510,37 @@ export default function Dashboard() {
           style={{
             maxWidth: modoPresentacion ? "100%" : 1500,
             margin: "0 auto",
-            padding: modoPresentacion ? "28px 48px" : "26px 28px",
+            padding: modoPresentacion ? "32px 48px" : "28px 28px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 24,
+            gap: 28,
             color: "#ffffff",
           }}
         >
-          {/* LOGO AMPLIADO EL DOBLE EXACTO (X2) Y SEPARADO */}
-          <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
+          {/* LOGO AMPLIADO AL TRIPLE (X3) Y SEPARADO CON 48PX */}
+          <div style={{ display: "flex", alignItems: "center", gap: 48 }}>
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
               style={{
-                width: modoPresentacion ? 220 : 170,
-                height: modoPresentacion ? 244 : 188,
+                width: modoPresentacion ? 340 : 260,
+                height: modoPresentacion ? 376 : 288,
                 flexShrink: 0,
-                marginRight: 16,
-                filter: "drop-shadow(0 0 22px rgba(229,184,11,.6))",
+                marginRight: 24,
+                filter: "drop-shadow(0 0 28px rgba(229,184,11,.7))",
               }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 38 : 25, marginBottom: 6, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 40 : 26, marginBottom: 8, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 20px rgba(229,184,11,.8)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
-              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 6, fontSize: modoPresentacion ? 17 : 14.5 }}>
+              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 8, fontSize: modoPresentacion ? 18 : 15 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
-                <p style={{ color: "#e5b80b", fontSize: 11.5, marginTop: 0, fontWeight: 700 }}>
+                <p style={{ color: "#e5b80b", fontSize: 12, marginTop: 0, fontWeight: 700 }}>
                   Última sincronización: {tiempoRelativo(resumen.ultimaSync.toDate())}
                   {usuarioGoogle && <span style={{ marginLeft: 8, color: "#457b9d" }}>· {usuarioGoogle.email}</span>}
                 </p>
@@ -1746,7 +1746,7 @@ function TendenciaChart({ historial, grande, actividadPorDia }) {
       }}
     >
       <div style={{ fontSize: grande ? 20 : 15, fontWeight: 700, color: "#ffffff", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>📈 Tendencia de avance {historial.length > 0 ? `(${historial.length} días)` : ""}</span>
+        <span>📈 Tendencia de avance {historial.length > 0 ? `(${historial.length} days)` : ""}</span>
         <span style={{ fontSize: 11, color: "#a8dadc", fontWeight: 400 }}>Desliza horizontalmente ↔</span>
       </div>
 
