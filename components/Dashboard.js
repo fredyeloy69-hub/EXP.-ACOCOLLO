@@ -1066,7 +1066,21 @@ export default function Dashboard() {
                           {g.area}
                         </span>
                         <span style={{ color: "#e5b80b", fontSize: 12 }}>›</span>
-                        <span style={{ fontSize: 14.5, fontWeight: 800, color: "#ffffff", textShadow: "0 1px 2px rgba(0,0,0,.5)" }}>{g.especialidad}</span>
+                        {/* TÍTULO PRINCIPAL DE LA ESPECIALIDAD RESALTADO EN DORADO CON TEXTO OSCURO */}
+                        <span
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 800,
+                            color: "#0c1015",
+                            background: "#e5b80b",
+                            padding: "3px 10px",
+                            borderRadius: "6px",
+                            boxShadow: "0 2px 8px rgba(229,184,11,.4)",
+                            textShadow: "none",
+                          }}
+                        >
+                          {g.especialidad}
+                        </span>
                         <span style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
                           <MiniDona completas={g.items.length - pendientesGrupo} total={g.items.length} />
                           {tienePendientes && (
@@ -1359,16 +1373,17 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
               style={{
                 fontSize: esUltimo ? 14.5 : 12,
                 fontWeight: esUltimo ? 800 : 600,
-                // AQUÍ APLICAMOS EL DORADO CON TEXTO NEGRO PARA EL TÍTULO FINAL
-                color: esUltimo ? "#0c1015" : "#e5b80b",
-                background: esUltimo ? "#e5b80b" : "transparent",
-                padding: esUltimo ? "2px 8px" : "0",
-                borderRadius: esUltimo ? "6px" : "0",
-                boxShadow: esUltimo ? "0 2px 8px rgba(229,184,11,.4)" : "none",
+                // LAS SUBCARPETAS REGRESAN A SU COLOR SUAVE/BLANCO LIMPIO
+                color: esUltimo ? "#ffffff" : "#e5b80b",
+                background: "transparent",
+                padding: 0,
+                borderRadius: 0,
+                boxShadow: "none",
+                textShadow: esUltimo ? "0 1px 2px rgba(0,0,0,.6)" : "none",
               }}
             >
               {p}
-              {esUltimo && <span style={{ color: "#0c1015", marginLeft: 4 }}>↗</span>}
+              {esUltimo && <span style={{ color: "#e5b80b", marginLeft: 4 }}>↗</span>}
             </span>
           </span>
         );
