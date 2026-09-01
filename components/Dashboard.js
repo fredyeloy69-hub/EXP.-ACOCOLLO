@@ -127,7 +127,7 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
-  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
+  const [tipoExportacion, setTipoExportacion] = useState("todas");
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
@@ -170,18 +170,29 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
+  // FUNCIÓN AUXILIAR ACTUALIZADA: Respeta el filtro de estado actual de la pantalla y el selector de exportación
   function filtrarCarpetasParaExportar(listaCarpetas) {
+    let lista = listaCarpetas;
+    
+    if (filtroArea !== "Todas") {
+      lista = lista.filter((c) => (c.area || "Sin área") === filtroArea);
+    }
+
+    if (filtroEstado === "pendientes") {
+      lista = lista.filter((c) => c.estado !== "completa");
+    } else if (filtroEstado !== "todas") {
+      lista = lista.filter((c) => c.estado === filtroEstado);
+    }
+
     if (tipoExportacion === "incompletas") {
-      return listaCarpetas.filter((c) => c.estado === "incompleta");
+      lista = lista.filter((c) => c.estado === "incompleta");
+    } else if (tipoExportacion === "vacias") {
+      lista = lista.filter((c) => c.estado === "vacia");
+    } else if (tipoExportacion === "incompletas_vacias") {
+      lista = lista.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
     }
-    if (tipoExportacion === "vacias") {
-      return listaCarpetas.filter((c) => c.estado === "vacia");
-    }
-    if (tipoExportacion === "incompletas_vacias") {
-      return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
-    }
-    return listaCarpetas; // "todas"
+
+    return lista;
   }
 
   function handleExportarArea(areaNombre, carpetasDelArea) {
@@ -189,6 +200,10 @@ export default function Dashboard() {
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
       const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      if (listaFiltrada.length === 0) {
+        alert("No hay carpetas que coincidan con el filtro actual para exportar.");
+        return;
+      }
       generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
     } finally {
       setExportandoArea(null);
@@ -200,6 +215,10 @@ export default function Dashboard() {
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
       const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      if (listaFiltrada.length === 0) {
+        alert("No hay carpetas que coincidan con el filtro actual para exportar.");
+        return;
+      }
       generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
     } catch (err) {
       alert(`No se pudo generar el reporte consolidado: ${err.message}`);
@@ -215,6 +234,10 @@ export default function Dashboard() {
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
       const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      if (listaFiltrada.length === 0) {
+        alert("No hay carpetas que coincidan con el filtro actual para exportar.");
+        return;
+      }
       await Promise.race([
         generarReporteExcelPorArea(areaNombre, listaFiltrada),
         timeoutPromise,
