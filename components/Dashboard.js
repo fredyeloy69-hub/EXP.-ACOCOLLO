@@ -992,43 +992,64 @@ export default function Dashboard() {
               </select>
             </div>
 
-            <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+            {/* BOTONES DE EXPORTAR POR ÁREA (MUY VISIBLES Y DESTACADOS) */}
+            <div style={{ display: "flex", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
               {areas.map((a) => (
-                <div key={a} style={{ display: "flex", gap: 4 }}>
+                <div 
+                  key={a} 
+                  style={{ 
+                    display: "flex", 
+                    gap: 6, 
+                    background: "#1f2d3d", 
+                    padding: "8px 10px", 
+                    borderRadius: 12, 
+                    border: "1.5px solid #e5b80b66",
+                    alignItems: "center",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", paddingLeft: 4 }}>
+                    📁 {a}:
+                  </span>
                   <button
                     onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoArea === a}
                     style={{
                       fontSize: 11,
-                      padding: "6px 12px",
-                      borderRadius: "20px 0 0 20px",
-                      border: "1.5px solid #457b9d",
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      border: "1.5px solid #e5b80b",
                       background: "#141c24",
-                      color: exportandoArea === a ? "#a8dadc" : "#ffffff",
-                      fontWeight: 600,
+                      color: exportandoArea === a ? "#a8dadc" : "#e5b80b",
+                      fontWeight: 700,
                       cursor: exportandoArea === a ? "not-allowed" : "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
                     }}
                     title={`Exportar reporte PDF de ${a}`}
                   >
-                    📄 {exportandoArea === a ? "Generando..." : `PDF ${a}`}
+                    <span>📄</span> {exportandoArea === a ? "Generando..." : "PDF"}
                   </button>
                   <button
                     onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoExcelArea === a}
                     style={{
                       fontSize: 11,
-                      padding: "6px 12px",
-                      borderRadius: "0 20px 20px 0",
-                      border: "1.5px solid #457b9d",
-                      borderLeft: "none",
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      border: "1.5px solid #2a9d8f",
                       background: "#141c24",
-                      color: exportandoExcelArea === a ? "#a8dadc" : "#e5b80b",
-                      fontWeight: 600,
+                      color: exportandoExcelArea === a ? "#a8dadc" : "#2a9d8f",
+                      fontWeight: 700,
                       cursor: exportandoExcelArea === a ? "not-allowed" : "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
                     }}
                     title={`Exportar reporte Excel de ${a}`}
                   >
-                    📊 {exportandoExcelArea === a ? "Generando..." : "Excel"}
+                    <span>📊</span> {exportandoExcelArea === a ? "Generando..." : "Excel"}
                   </button>
                 </div>
               ))}
