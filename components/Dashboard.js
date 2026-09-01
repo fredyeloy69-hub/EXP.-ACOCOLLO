@@ -517,12 +517,16 @@ export default function Dashboard() {
             color: "#ffffff",
           }}
         >
-          {/* LOGOTIPO CORREGIDO CON CONTENEDOR FLEXIBLE DE TAMAÑO FIJO Y SIN CORTE */}
+          {/* LOGOTIPO CORREGIDO CON CONTENEDOR FLEXIBLE DE TAMAÑO FIJO Y RESPALDO */}
           <div style={{ display: "flex", alignItems: "center", gap: 24, minWidth: 0 }}>
             <div style={{ width: "90px", height: "90px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img
-                src={LOGO_PUNO_BASE64}
+                src={typeof LOGO_PUNO_BASE64 !== "undefined" && LOGO_PUNO_BASE64 ? LOGO_PUNO_BASE64 : ""}
                 alt="Escudo Gobierno Regional de Puno"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  e.currentTarget.parentElement.innerHTML = '<span style="color: #e5b80b; font-weight: 800; font-size: 16px;">GORE</span>';
+                }}
                 style={{
                   width: "100%",
                   height: "100%",
