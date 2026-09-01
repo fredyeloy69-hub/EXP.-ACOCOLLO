@@ -355,7 +355,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   doc.save(nombreArchivo);
 }
 
-// Función consolidada global requerida por el Dashboard
+// Función consolidada global robusta adaptada a cualquier estructura del Dashboard
 export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
@@ -388,27 +388,39 @@ export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
 
   const body = [];
   let contador = 1;
-  let totalGlobalCarpetas = 0;
-  let totalGlobalCompletas = 0;
 
-  const areasEntries = Array.isArray(datosAreas) ? datosAreas : Object.entries(datosAreas);
+  // Detección automática y flexible de datosAreas (sea objeto, array, u otro formato)
+  let listaAreas = [];
+  if (Array.isArray(datosAreas)) {
+    listaAreas = datosAreas.map((item) => ({
+      nombre: item.nombre || item.area || item.key || "Área",
+      carpetas: item.carpetas || item.items || item.files || (Array.isArray(item) ? item : []),
+    }));
+  } else if (datosAreas && typeof datosAreas === "object") {
+    listaAreas = Object.entries(datosAreas).map(([key, val]) => {
+      let carpetasArr = [];
+      if (Array.isArray(val)) {
+        carpetasArr = val;
+      } else if (val && typeof val === "object") {
+        carpetasArr = val.carpetas || val.items || val.archivos || Object.values(val).find(Array.isArray) || [];
+      }
+      return { nombre: key, carpetas: carpetasArr };
+    });
+  }
 
-  for (const entry of areasEntries) {
-    const areaNombre = Array.isArray(datosAreas) ? entry.nombre : entry[0];
-    const carpetas = Array.isArray(datosAreas) ? entry.carpetas : entry[1];
+  for (const area of listaAreas) {
+    const areaNombre = area.nombre;
+    const carpetas = area.carpetas;
 
-    if (!carpetas || carpetas.length === 0) continue;
+    if (!Array.isArray(carpetas) || carpetas.length === 0) continue;
 
     const cantTotal = carpetas.length;
-    const cantCompletas = carpetas.filter((c) => c.estado === "completa").length;
+    const cantCompletas = carpetas.filter((c) => c && (c.estado === "completa" || c.status === "completa")).length;
     const pctArea = cantTotal > 0 ? Math.round((cantCompletas / cantTotal) * 100) : 0;
-
-    totalGlobalCarpetas += cantTotal;
-    totalGlobalCompletas += cantCompletas;
 
     body.push([
       { content: String(contador++), styles: { halign: "center", fontStyle: "bold" } },
-      { content: areaNombre.toUpperCase(), styles: { fontStyle: "bold" } },
+      { content: String(areaNombre).toUpperCase(), styles: { fontStyle: "bold" } },
       { content: `${cantCompletas} / ${cantTotal}`, styles: { halign: "center" } },
       { content: `${pctArea}%`, styles: { halign: "center", fontStyle: "bold", textColor: pctArea >= 100 ? VERDE : TEAL } },
     ]);
