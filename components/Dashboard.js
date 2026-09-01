@@ -1359,12 +1359,16 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
               style={{
                 fontSize: esUltimo ? 14.5 : 12,
                 fontWeight: esUltimo ? 800 : 600,
-                color: esUltimo ? "#ffffff" : "#e5b80b",
-                textShadow: esUltimo ? "0 1px 2px rgba(0,0,0,.6)" : "none",
+                // AQUÍ APLICAMOS EL DORADO CON TEXTO NEGRO PARA EL TÍTULO FINAL
+                color: esUltimo ? "#0c1015" : "#e5b80b",
+                background: esUltimo ? "#e5b80b" : "transparent",
+                padding: esUltimo ? "2px 8px" : "0",
+                borderRadius: esUltimo ? "6px" : "0",
+                boxShadow: esUltimo ? "0 2px 8px rgba(229,184,11,.4)" : "none",
               }}
             >
               {p}
-              {esUltimo && <span style={{ color: "#e5b80b", marginLeft: 4 }}>↗</span>}
+              {esUltimo && <span style={{ color: "#0c1015", marginLeft: 4 }}>↗</span>}
             </span>
           </span>
         );
