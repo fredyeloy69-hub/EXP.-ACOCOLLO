@@ -952,14 +952,14 @@ export default function Dashboard() {
               }}
             />
 
-            {/* SELECTOR DE FILTRO Y BOTÓN DE EXPORTACIÓN DIRECTA */}
+            {/* SELECTOR DE FILTRO DE EXPORTACIÓN */}
             <div
               style={{
                 background: "#141c24",
                 padding: "10px 14px",
                 borderRadius: 10,
                 border: "1.5px solid #e5b80b66",
-                marginBottom: 12,
+                marginBottom: 14,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -993,7 +993,6 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              {/* BOTÓN DE EXPORTACIÓN GLOBAL DIRECTA DEL FILTRO */}
               <button
                 onClick={handleExportarGlobal}
                 disabled={exportandoGlobal || carpetas.length === 0}
@@ -1013,66 +1012,66 @@ export default function Dashboard() {
                 }}
                 title="Generar PDF consolidado aplicando el filtro seleccionado"
               >
-                <span>📄</span> {exportandoGlobal ? "Generando Filtro..." : "Exportar Filtro PDF"}
+                <span>📄</span> {exportandoGlobal ? "Generando Filtro..." : "Exportar Filtro PDF Global"}
               </button>
             </div>
 
-            {/* BOTONES DE EXPORTAR POR ÁREA (MUY VISIBLES Y DESTACADOS) */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
+            {/* BOTONES DE EXPORTAR POR CADA ÁREA (IDÉNTICOS AL ESTILO DE TU CAPTURA) */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
               {areas.map((a) => (
                 <div 
                   key={a} 
                   style={{ 
                     display: "flex", 
                     gap: 6, 
-                    background: "#1f2d3d", 
-                    padding: "8px 10px", 
+                    background: "#141c24", 
+                    padding: "6px 8px", 
                     borderRadius: 12, 
                     border: "1.5px solid #e5b80b66",
                     alignItems: "center",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", paddingLeft: 4 }}>
-                    📁 {a}:
-                  </span>
                   <button
                     onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoArea === a}
                     style={{
                       fontSize: 11,
-                      padding: "7px 12px",
+                      fontWeight: 700,
+                      padding: "8px 12px",
                       borderRadius: 8,
                       border: "1.5px solid #e5b80b",
-                      background: "#141c24",
+                      background: "#1f2d3d",
                       color: exportandoArea === a ? "#a8dadc" : "#e5b80b",
-                      fontWeight: 700,
                       cursor: exportandoArea === a ? "not-allowed" : "pointer",
                       display: "flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
+                      whiteSpace: "nowrap",
                     }}
-                    title={`Exportar reporte PDF de ${a}`}
+                    title={`Exportar reporte PDF de ${a} aplicando el filtro actual`}
                   >
-                    <span>📄</span> {exportandoArea === a ? "Generando..." : "PDF"}
+                    <span>📄</span> {exportandoArea === a ? "Generando..." : `PDF . ${a.toUpperCase()}`}
                   </button>
+
                   <button
                     onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoExcelArea === a}
                     style={{
                       fontSize: 11,
-                      padding: "7px 12px",
+                      fontWeight: 700,
+                      padding: "8px 12px",
                       borderRadius: 8,
                       border: "1.5px solid #2a9d8f",
-                      background: "#141c24",
+                      background: "#1f2d3d",
                       color: exportandoExcelArea === a ? "#a8dadc" : "#2a9d8f",
-                      fontWeight: 700,
                       cursor: exportandoExcelArea === a ? "not-allowed" : "pointer",
                       display: "flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
+                      whiteSpace: "nowrap",
                     }}
-                    title={`Exportar reporte Excel de ${a}`}
+                    title={`Exportar reporte Excel de ${a} aplicando el filtro actual`}
                   >
                     <span>📊</span> {exportandoExcelArea === a ? "Generando..." : "Excel"}
                   </button>
