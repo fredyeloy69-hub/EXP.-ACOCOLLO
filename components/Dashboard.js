@@ -169,7 +169,7 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // FUNCIONES DE EXPORTACIÓN DIRECTAS POR ESTADO
+  // FUNCIONES DE FILTRADO Y EXPORTACIÓN POR ESTADO
   function filtrarCarpetasPorEstado(listaCarpetas, estadoFiltro) {
     if (estadoFiltro === "incompleta") {
       return listaCarpetas.filter((c) => c.estado === "incompleta");
@@ -929,37 +929,37 @@ export default function Dashboard() {
               }}
             />
 
-            {/* PANEL DE BOTONES DEDICADOS EXCLUSIVAMENTE A LA EXPORTACIÓN POR ESTADO */}
+            {/* PANEL PRINCIPAL DE EXPORTACIÓN DIRECTA POR ESTADO Y ÁREA */}
             <div
               style={{
                 background: "#141c24",
-                padding: "14px 16px",
+                padding: "16px 18px",
                 borderRadius: 12,
-                border: "2px solid #e5b80b",
+                border: "2.5px solid #e5b80b",
                 marginBottom: 16,
                 boxShadow: "0 4px 20px rgba(229,184,11,.15)",
               }}
             >
-              <div style={{ fontSize: 13, fontWeight: 800, color: "#e5b80b", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                <span>⚡</span> PANEL DE EXPORTACIÓN DIRECTA POR ESTADO:
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: "#e5b80b", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                <span>⚡</span> PANEL DE EXPORTACIÓN DIRECTA (PDF / EXCEL POR ESTADO)
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {areas.map((a) => (
-                  <div key={a} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap", background: "#0c1015", padding: "8px 12px", borderRadius: 8, border: "1px solid #457b9d44" }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", minWidth: 130 }}>{a}</span>
+                  <div key={a} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", background: "#0c1015", padding: "10px 14px", borderRadius: 8, border: "1px solid #457b9d66" }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#ffffff", minWidth: 140 }}>📁 {a}</span>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {/* INCOMPLETAS */}
                       <button
                         onClick={() => handleExportarAreaPorEstado(a, carpetasPorArea[a] || [], "incompleta")}
                         disabled={exportandoArea === `${a}_incompleta`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #e67e22", background: "#e67e2222", color: "#e67e22", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #e67e22", background: "#e67e2222", color: "#e67e22", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoArea === `${a}_incompleta` ? "..." : "PDF Incompletas"}
                       </button>
                       <button
                         onClick={() => handleExportarExcelAreaPorEstado(a, carpetasPorArea[a] || [], "incompleta")}
                         disabled={exportandoExcelArea === `${a}_incompleta`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #e67e22", background: "#141c24", color: "#e67e22", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #e67e22", background: "#141c24", color: "#e67e22", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoExcelArea === `${a}_incompleta` ? "..." : "Excel Inc."}
                       </button>
@@ -968,14 +968,14 @@ export default function Dashboard() {
                       <button
                         onClick={() => handleExportarAreaPorEstado(a, carpetasPorArea[a] || [], "completa")}
                         disabled={exportandoArea === `${a}_completa`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #e5b80b", background: "#e5b80b22", color: "#e5b80b", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #e5b80b", background: "#e5b80b22", color: "#e5b80b", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoArea === `${a}_completa` ? "..." : "PDF Completas"}
                       </button>
                       <button
                         onClick={() => handleExportarExcelAreaPorEstado(a, carpetasPorArea[a] || [], "completa")}
                         disabled={exportandoExcelArea === `${a}_completa`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #e5b80b", background: "#141c24", color: "#e5b80b", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #e5b80b", background: "#141c24", color: "#e5b80b", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoExcelArea === `${a}_completa` ? "..." : "Excel Comp."}
                       </button>
@@ -984,14 +984,14 @@ export default function Dashboard() {
                       <button
                         onClick={() => handleExportarAreaPorEstado(a, carpetasPorArea[a] || [], "vacia")}
                         disabled={exportandoArea === `${a}_vacia`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #c0392b", background: "#c0392b22", color: "#ff6b6b", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #c0392b", background: "#c0392b22", color: "#ff6b6b", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoArea === `${a}_vacia` ? "..." : "PDF Vacías"}
                       </button>
                       <button
                         onClick={() => handleExportarExcelAreaPorEstado(a, carpetasPorArea[a] || [], "vacia")}
                         disabled={exportandoExcelArea === `${a}_vacia`}
-                        style={{ fontSize: 10.5, padding: "5px 10px", borderRadius: 6, border: "1px solid #c0392b", background: "#141c24", color: "#ff6b6b", fontWeight: 700, cursor: "pointer" }}
+                        style={{ fontSize: 11, padding: "6px 10px", borderRadius: 6, border: "1px solid #c0392b", background: "#141c24", color: "#ff6b6b", fontWeight: 700, cursor: "pointer" }}
                       >
                         {exportandoExcelArea === `${a}_vacia` ? "..." : "Excel Vác."}
                       </button>
@@ -999,48 +999,6 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-              {areas.map((a) => (
-                <div key={a} style={{ display: "flex", gap: 4 }}>
-                  <button
-                    onClick={() => handleExportarAreaPorEstado(a, carpetasPorArea[a] || [], "todas")}
-                    disabled={exportandoArea === `${a}_todas`}
-                    style={{
-                      fontSize: 11,
-                      padding: "6px 12px",
-                      borderRadius: "20px 0 0 20px",
-                      border: "1.5px solid #457b9d",
-                      background: "#141c24",
-                      color: exportandoArea === `${a}_todas` ? "#a8dadc" : "#ffffff",
-                      fontWeight: 600,
-                      cursor: exportandoArea === `${a}_todas` ? "not-allowed" : "pointer",
-                    }}
-                    title={`Exportar reporte PDF de ${a}`}
-                  >
-                    📄 {exportandoArea === `${a}_todas` ? "Generando..." : `PDF Todas (${a})`}
-                  </button>
-                  <button
-                    onClick={() => handleExportarExcelAreaPorEstado(a, carpetasPorArea[a] || [], "todas")}
-                    disabled={exportandoExcelArea === `${a}_todas`}
-                    style={{
-                      fontSize: 11,
-                      padding: "6px 12px",
-                      borderRadius: "0 20px 20px 0",
-                      border: "1.5px solid #457b9d",
-                      borderLeft: "none",
-                      background: "#141c24",
-                      color: exportandoExcelArea === `${a}_todas` ? "#a8dadc" : "#e5b80b",
-                      fontWeight: 600,
-                      cursor: exportandoExcelArea === `${a}_todas` ? "not-allowed" : "pointer",
-                    }}
-                    title={`Exportar reporte Excel de ${a}`}
-                  >
-                    📊 {exportandoExcelArea === `${a}_todas` ? "Generando..." : "Excel Todas"}
-                  </button>
-                </div>
-              ))}
             </div>
 
             <div
