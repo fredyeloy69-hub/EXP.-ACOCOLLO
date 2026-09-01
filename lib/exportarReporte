@@ -9,18 +9,18 @@ const ESTADO_LABEL = {
 };
 
 const ESTADO_RGB = {
-  completa: [46, 204, 113],
+  completa: [42, 157, 143],
   incompleta: [243, 156, 18],
-  vacia: [231, 76, 60],
+  vacia: [192, 57, 43],
 };
 
-const NARANJA_HEADER = [230, 126, 34];
-const TEAL = [23, 163, 152];
-const TEAL_CLARO = [45, 212, 191];
-const VERDE = [46, 204, 113];
+const TEAL_HEADER = [42, 157, 143];
+const TEAL = [42, 157, 143];
+const TEAL_CLARO = [70, 185, 175];
+const VERDE = [42, 157, 143];
 const NARANJA = [243, 156, 18];
-const ROJO = [231, 76, 60];
-const AZUL_OSCURO = [20, 30, 60];
+const ROJO = [192, 57, 43];
+const AZUL_PETROLEO = [38, 70, 83];
 
 function dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX) {
   let y = 12;
@@ -117,7 +117,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const FACTORES_HOJA = [0.72, 0.78, 0.83, 0.87, 0.90, 0.93, 0.96];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min(nivelVisual - 1, FACTORES_HOJA.length - 1)];
-    return mezclarConBlanco(NARANJA_HEADER, factor);
+    return mezclarConBlanco(TEAL_HEADER, factor);
   }
 
   function empujarFila(c, nivelVisual) {
@@ -139,7 +139,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   function empujarSubEncabezado(nombre, nivel) {
     const factoresPorNivel = [0.40, 0.55, 0.68, 0.78, 0.86, 0.92];
     const factor = factoresPorNivel[Math.min(nivel - 2, factoresPorNivel.length - 1)];
-    const color = mezclarConBlanco(NARANJA_HEADER, factor);
+    const color = mezclarConBlanco(TEAL_HEADER, factor);
     const sangriaIzq = 2 + (nivel - 1) * 4.5;
     const textoSub = `>  ${nombre}`;
     const lineasSub = doc.splitTextToSize(textoSub, anchoUtilTabla - sangriaIzq - 4);
@@ -150,7 +150,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
         colSpan: 4,
         styles: {
           fillColor: color,
-          textColor: [70, 45, 15],
+          textColor: [26, 56, 64],
           fontStyle: "bold",
           fontSize: 9.0,
           halign: "left",
@@ -212,7 +212,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
         content: lineasEsp.join("\n"), 
         colSpan: 4, 
         styles: { 
-          fillColor: NARANJA_HEADER, 
+          fillColor: TEAL_HEADER, 
           textColor: [255, 255, 255], 
           fontStyle: "bold", 
           fontSize: 10.5, 
@@ -227,7 +227,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
 
   function dibujarEncabezado() {
     let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
-    doc.setFillColor(...AZUL_OSCURO);
+    doc.setFillColor(...AZUL_PETROLEO);
     doc.rect(marginX, y, pageWidth - marginX * 2, 9, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10.5);
@@ -244,7 +244,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
 
   // PORTADA — resumen gráfico
   let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
-  doc.setFillColor(...AZUL_OSCURO);
+  doc.setFillColor(...AZUL_PETROLEO);
   doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -342,7 +342,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     head: [["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"]],
     body,
     styles: { fontSize: 8.5, cellPadding: 2, valign: "middle", overflow: "linebreak" },
-    headStyles: { fillColor: AZUL_OSCURO, textColor: 255, fontStyle: "bold" },
+    headStyles: { fillColor: AZUL_PETROLEO, textColor: 255, fontStyle: "bold" },
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       1: { cellWidth: 89 },
@@ -445,14 +445,14 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
   const FACTORES_HOJA = [0.72, 0.78, 0.83, 0.87, 0.90, 0.93, 0.96];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min(nivelVisual - 1, FACTORES_HOJA.length - 1)];
-    return mezclarConBlanco(NARANJA_HEADER, factor);
+    return mezclarConBlanco(TEAL_HEADER, factor);
   }
 
   // ==========================================
   // 1. PORTADA GLOBAL DEL PROYECTO
   // ==========================================
   let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
-  doc.setFillColor(...AZUL_OSCURO);
+  doc.setFillColor(...AZUL_PETROLEO);
   doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -551,7 +551,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     doc.addPage();
     let yArea = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
 
-    doc.setFillColor(...AZUL_OSCURO);
+    doc.setFillColor(...AZUL_PETROLEO);
     doc.rect(marginX, yArea, pageWidth - marginX * 2, 11, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
@@ -600,7 +600,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     
     function dibujarEncabezadoAreaTabla() {
       let yT = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
-      doc.setFillColor(...AZUL_OSCURO);
+      doc.setFillColor(...AZUL_PETROLEO);
       doc.rect(marginX, yT, pageWidth - marginX * 2, 9, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(10.5);
@@ -651,7 +651,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
     function empujarSubEncabezadoArea(nombre, nivel) {
       const factoresPorNivel = [0.40, 0.55, 0.68, 0.78, 0.86, 0.92];
       const factor = factoresPorNivel[Math.min(nivel - 2, factoresPorNivel.length - 1)];
-      const color = mezclarConBlanco(NARANJA_HEADER, factor);
+      const color = mezclarConBlanco(TEAL_HEADER, factor);
       const sangriaIzq = 2 + (nivel - 1) * 4.5;
       const textoSub = `>  ${nombre}`;
       const lineasSub = doc.splitTextToSize(textoSub, anchoUtilTabla - sangriaIzq - 4);
@@ -661,7 +661,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
           colSpan: 4,
           styles: {
             fillColor: color,
-            textColor: [70, 45, 15],
+            textColor: [26, 56, 64],
             fontStyle: "bold",
             fontSize: 9.0,
             halign: "left",
@@ -718,7 +718,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
           content: lineasEsp.join("\n"),
           colSpan: 4,
           styles: {
-            fillColor: NARANJA_HEADER,
+            fillColor: TEAL_HEADER,
             textColor: [255, 255, 255],
             fontStyle: "bold",
             fontSize: 9.5,
@@ -738,7 +738,7 @@ export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
       head: [["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"]],
       body: bodyArea,
       styles: { fontSize: 8.5, cellPadding: 2, valign: "middle", overflow: "linebreak" },
-      headStyles: { fillColor: AZUL_OSCURO, textColor: 255, fontStyle: "bold" },
+      headStyles: { fillColor: AZUL_PETROLEO, textColor: 255, fontStyle: "bold" },
       columnStyles: {
         0: { cellWidth: 12, halign: "center" },
         1: { cellWidth: 89 },
