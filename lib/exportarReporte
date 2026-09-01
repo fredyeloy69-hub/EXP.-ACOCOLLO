@@ -22,36 +22,19 @@ const NARANJA = [243, 156, 18];
 const ROJO = [231, 76, 60];
 const AZUL_OSCURO = [20, 30, 60];
 
-function dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX) {
-  let y = 12;
-  if (logoBase64) {
-    const anchoLogo = 13;
-    const altoLogo = 14.6;
-    doc.addImage(logoBase64, "PNG", marginX, y - 3, anchoLogo, altoLogo);
-  }
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("GOBIERNO REGIONAL DE PUNO GERENCIA REGIONAL DE INFRAESTRUCTURA", pageWidth / 2, y, { align: "center" });
-  y += 5;
-  doc.text("SUB GERENCIA DE ESTUDIOS DEFINITIVOS", pageWidth / 2, y, { align: "center" });
-  y += 6;
-  doc.setFontSize(8.5);
-  const lineasProyecto = doc.splitTextToSize(proyectoNombre, pageWidth - marginX * 2 - 10);
-  doc.text(lineasProyecto, pageWidth / 2, y, { align: "center" });
-  y += lineasProyecto.length * 4 + 4;
-  return y;
-}
-
 export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEL DEPARTAMENTO DE PUNO"',
+    proyectoNombre =
+      '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEPARTAMENTO DE PUNO"',
+    usuarioFirma = "Sistema Chijnaya",
   } = opts;
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 14;
+  const anchoUtilTabla = pageWidth - marginX * 2;
 
   const grupos = {};
   const ordenGrupos = [];
@@ -89,7 +72,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     return rgb.map((c) => Math.round(c + (255 - c) * factor));
   }
 
-  const FACTORES_HOJA = [0.72, 0.80, 0.86, 0.90, 0.93];
+  const FACTORES_HOJA = [0.72, 0.78, 0.83, 0.87, 0.90, 0.93, 0.96];
   function colorHoja(nivelVisual) {
     const factor = FACTORES_HOJA[Math.min(nivelVisual - 1, FACTORES_HOJA.length - 1)];
     return mezclarConBlanco(NARANJA_HEADER, factor);
@@ -98,10 +81,10 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   function empujarFila(c, nivelVisual) {
     const estado = c.estado || "incompleta";
     const nombreMostrado = c.nombre || (c.ruta || "").split(" / ").pop() || "-";
-    const sangriaIzq = 2 + Math.max(0, nivelVisual - 1) * 6;
+    const sangriaIzq = 2 + Math.max(0, nivelVisual - 1) * 4.5;
     const fondo = colorHoja(nivelVisual);
     body.push([
-      { content: String(contadorFila++), styles: { fillColor: fondo } },
+      { content: String(contadorFila++), styles: { fillColor: fondo, halign: "center" } },
       { content: nombreMostrado, styles: { fillColor: fondo, cellPadding: { top: 2, right: 2, bottom: 2, left: sangriaIzq } } },
       {
         content: ESTADO_LABEL[estado] || estado.toUpperCase(),
@@ -112,27 +95,32 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   }
 
   function empujarSubEncabezado(nombre, nivel) {
-    const factoresPorNivel = [0.45, 0.65, 0.82];
+    const factoresPorNivel = [0.40, 0.55, 0.68, 0.78, 0.86, 0.92];
     const factor = factoresPorNivel[Math.min(nivel - 2, factoresPorNivel.length - 1)];
     const color = mezclarConBlanco(NARANJA_HEADER, factor);
-    const sangriaIzq = 2 + (nivel - 1) * 6;
+    const sangriaIzq = 2 + (nivel - 1) * 4.5;
+    
+    const textoSub = `>  ${nombre}`;
+    const lineasSub = doc.splitTextToSize(textoSub, anchoUtilTabla - sangriaIzq - 4);
+
     body.push([
       {
-        content: `➤  ${nombre}`,
+        content: lineasSub.join("\n"),
         colSpan: 4,
         styles: {
           fillColor: color,
           textColor: [70, 45, 15],
           fontStyle: "bold",
-          fontSize: 9.5,
+          fontSize: 9.0,
           halign: "left",
-          cellPadding: { top: 3, right: 2, bottom: 3, left: sangriaIzq },
+          overflow: "linebreak",
+          cellPadding: { top: 2.5, right: 2, bottom: 2.5, left: sangriaIzq },
         },
       },
     ]);
   }
 
-  const NIVEL_MAX_INTERMEDIO = 4;
+  const NIVEL_MAX_INTERMEDIO = 6;
   function agruparRecursivo(items, nivelIdx, nivelVisual) {
     if (nivelIdx > NIVEL_MAX_INTERMEDIO) {
       const ordenado = [...items].sort((a, b) => comparaNatural(a.nombre, b.nombre));
@@ -144,7 +132,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     let hayNivelMasProfundo = false;
     for (const c of items) {
       const partes = (c.ruta || c.nombre || "").split(" / ").filter(Boolean);
-      const clave = partes.length > nivelIdx + 1 ? partes[nivelIdx] : null;
+      const clave = partes.length >= nivelIdx + 1 ? partes[nivelIdx] : null;
       if (clave) hayNivelMasProfundo = true;
       const key = clave || `__directo__${c.nombre || c.id}`;
       if (!subgrupos[key]) subgrupos[key] = [];
@@ -176,29 +164,65 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   }
 
   for (const especialidad of ordenGrupos) {
+    const textoEsp = especialidad.toUpperCase();
+    const lineasEsp = doc.splitTextToSize(textoEsp, anchoUtilTabla - 6);
+
     body.push([
-      { content: especialidad.toUpperCase(), colSpan: 4, styles: { fillColor: NARANJA_HEADER, textColor: [255, 255, 255], fontStyle: "bold", fontSize: 11, halign: "left", cellPadding: 3 } },
+      { 
+        content: lineasEsp.join("\n"), 
+        colSpan: 4, 
+        styles: { 
+          fillColor: NARANJA_HEADER, 
+          textColor: [255, 255, 255], 
+          fontStyle: "bold", 
+          fontSize: 10.5, 
+          halign: "left", 
+          overflow: "linebreak",
+          cellPadding: 3 
+        } 
+      },
     ]);
     agruparRecursivo(grupos[especialidad], 2, 1);
   }
 
+  function dibujarBloqueInstitucional() {
+    let y = 12;
+    if (logoBase64) {
+      const anchoLogo = 13;
+      const altoLogo = 14.6;
+      doc.addImage(logoBase64, "PNG", marginX, y - 3, anchoLogo, altoLogo);
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("GOBIERNO REGIONAL DE PUNO — GERENCIA REGIONAL DE INFRAESTRUCTURA", pageWidth / 2, y, { align: "center" });
+    y += 5;
+    doc.text("SUB GERENCIA DE ESTUDIOS DEFINITIVOS", pageWidth / 2, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(8);
+    
+    const lineasProyecto = doc.splitTextToSize(proyectoNombre, pageWidth - marginX * 2 - 20);
+    doc.text(lineasProyecto, pageWidth / 2, y, { align: "center" });
+    
+    return y + (lineasProyecto.length * 3.8) + 4;
+  }
+
   function dibujarEncabezado() {
-    let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
+    let y = dibujarBloqueInstitucional();
 
     doc.setFillColor(...AZUL_OSCURO);
     doc.rect(marginX, y, pageWidth - marginX * 2, 9, "F");
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.text(`REPORTE DE AVANCE — ${areaNombre.toUpperCase()}`, pageWidth / 2, y + 6.2, { align: "center" });
+    doc.setFontSize(10.5);
+    doc.text(`REPORTE DE AVANCE — ${areaNombre.toUpperCase()}`, pageWidth / 2, y + 6.0, { align: "center" });
     doc.setTextColor(0, 0, 0);
-    y += 16;
+    y += 15;
 
     const fecha = new Date().toLocaleString("es-PE");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.text(`Generado: ${fecha}`, marginX, y);
     doc.text(`Total: ${total}  ·  Completas: ${completas}  ·  Pendientes: ${total - completas}`, pageWidth - marginX, y, { align: "right" });
-    return y + 10;
+    return y + 8;
   }
 
   function dibujarBarra(x, y, ancho, alto, pct, colorRgb, colorFondoRgb) {
@@ -225,16 +249,16 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     doc.setTextColor(0, 0, 0);
   }
 
-  let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
+  let y = dibujarBloqueInstitucional();
 
   doc.setFillColor(...AZUL_OSCURO);
   doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
+  doc.setFontSize(12);
   doc.text(`RESUMEN DE AVANCE — ${areaNombre.toUpperCase()}`, pageWidth / 2, y + 7.5, { align: "center" });
   doc.setTextColor(0, 0, 0);
-  y += 20;
+  y += 18;
 
   const fechaGenerado = new Date().toLocaleString("es-PE");
   doc.setFont("helvetica", "normal");
@@ -242,7 +266,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   doc.setTextColor(100, 100, 100);
   doc.text(`Generado: ${fechaGenerado}`, pageWidth / 2, y, { align: "center" });
   doc.setTextColor(0, 0, 0);
-  y += 12;
+  y += 10;
 
   const pctCarpetas = total > 0 ? Math.round((completas / total) * 100) : 0;
 
@@ -255,7 +279,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   doc.setTextColor(0, 0, 0);
   y += 4;
   dibujarBarra(marginX, y, pageWidth - marginX * 2, 6, pctCarpetas, TEAL);
-  y += 14;
+  y += 12;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
@@ -266,7 +290,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   doc.setTextColor(0, 0, 0);
   y += 4;
   dibujarBarra(marginX, y, pageWidth - marginX * 2, 6, pctArchivos, TEAL_CLARO);
-  y += 18;
+  y += 16;
 
   const anchoTarjeta = (pageWidth - marginX * 2 - 3 * 4) / 4;
   const altoTarjeta = 22;
@@ -274,12 +298,12 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   dibujarTarjeta(marginX + (anchoTarjeta + 4) * 1, y, anchoTarjeta, altoTarjeta, completas, "COMPLETAS", VERDE);
   dibujarTarjeta(marginX + (anchoTarjeta + 4) * 2, y, anchoTarjeta, altoTarjeta, incompletas, "INCOMPLETAS", NARANJA);
   dibujarTarjeta(marginX + (anchoTarjeta + 4) * 3, y, anchoTarjeta, altoTarjeta, vacias, "VACÍAS", ROJO);
-  y += altoTarjeta + 14;
+  y += altoTarjeta + 12;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text(`AVANCE POR ESPECIALIDAD (${ordenGrupos.length})`, marginX, y);
-  y += 8;
+  y += 7;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
@@ -313,7 +337,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
 
-    y += 8.5;
+    y += 8;
   }
 
   doc.addPage();
@@ -325,12 +349,12 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     margin: { left: marginX, right: marginX, top: startY },
     head: [["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"]],
     body,
-    styles: { fontSize: 8.5, cellPadding: 2, valign: "middle" },
+    styles: { fontSize: 8.5, cellPadding: 2, valign: "middle", overflow: "linebreak" },
     headStyles: { fillColor: AZUL_OSCURO, textColor: 255, fontStyle: "bold" },
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
-      1: { cellWidth: "auto" },
-      2: { cellWidth: 26 },
+      1: { cellWidth: 89 },
+      2: { cellWidth: 26, halign: "center" },
       3: { cellWidth: 55 },
     },
     didDrawPage: () => {
@@ -345,6 +369,7 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
     doc.setPage(p);
     doc.setFontSize(7.5);
     doc.setTextColor(120, 120, 120);
+    doc.text(`Generado por: ${usuarioFirma}`, marginX, pageHeight - 8);
     doc.text(`Página ${p} de ${totalPaginas}`, pageWidth - marginX, pageHeight - 8, { align: "right" });
     doc.setTextColor(0, 0, 0);
   }
@@ -355,28 +380,276 @@ export function generarReportePorArea(areaNombre, carpetasDelArea, opts = {}) {
   doc.save(nombreArchivo);
 }
 
-// Función consolidada global robusta adaptada a cualquier estructura del Dashboard
-export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
+// ============================================================
+// REPORTE CONSOLIDADO GLOBAL DE TODO EL PROYECTO (ADAPTADO)
+// ============================================================
+export function generarReporteConsolidadoGlobal(datosEntrada, opts = {}) {
   const {
     logoBase64 = LOGO_PUNO_BASE64,
-    proyectoNombre = '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS EN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEL DEPARTAMENTO DE PUNO"',
+    proyectoNombre =
+      '"MEJORAMIENTO DEL SERVICIO DE ATENCION DE SALUD BASICOS IN CHIJNAYA DISTRITO DE PUCARA DE LA PROVINCIA DE LAMPA DEPARTAMENTO DE PUNO"',
+    usuarioFirma = "Sistema Chijnaya",
   } = opts;
+
+  // Normalizador inteligente para aceptar cualquier formato que mande el Dashboard
+  let todasLasCarpetas = [];
+  if (Array.isArray(datosEntrada)) {
+    if (datosEntrada.length > 0 && (datosEntrada[0].carpetas || datosEntrada[0].items)) {
+      for (const areaObj of datosEntrada) {
+        const nombreArea = areaObj.nombre || areaObj.area || "Sin área";
+        const subCarpetas = areaObj.carpetas || areaObj.items || [];
+        for (const c of subCarpetas) {
+          todasLasCarpetas.push({ ...c, area: c.area || nombreArea });
+        }
+      }
+    } else {
+      todasLasCarpetas = datosEntrada.map(c => ({ ...c, area: c.area || (c.ruta ? c.ruta.split(" / ")[0] : "Sin área") }));
+    }
+  } else if (datosEntrada && typeof datosEntrada === "object") {
+    const entries = Object.entries(datosEntrada);
+    for (const [key, val] of entries) {
+      if (Array.isArray(val)) {
+        for (const c of val) {
+          todasLasCarpetas.push({ ...c, area: c.area || key });
+        }
+      } else if (val && typeof val === "object") {
+        const subArr = val.carpetas || val.items || Object.values(val).find(Array.isArray) || [];
+        for (const c of subArr) {
+          todasLasCarpetas.push({ ...c, area: c.area || key });
+        }
+      }
+    }
+  }
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 14;
+  const anchoUtilTabla = pageWidth - marginX * 2;
 
-  let y = dibujarBloqueInstitucional(doc, logoBase64, proyectoNombre, pageWidth, marginX);
+  const areasMap = {};
+  for (const c of todasLasCarpetas) {
+    const area = c.area || "Sin área";
+    if (!areasMap[area]) areasMap[area] = [];
+    areasMap[area].push(c);
+  }
+  const ordenAreas = Object.keys(areasMap).sort((a, b) => a.localeCompare(b));
+
+  const totalCarpetas = todasLasCarpetas.length;
+  const totalCompletas = todasLasCarpetas.filter((c) => c.estado === "completa").length;
+  let totalNec = 0;
+  let totalComp = 0;
+  for (const c of todasLasCarpetas) {
+    totalNec += c.archivosNecesarios || 0;
+    totalComp += c.archivosCompletados || 0;
+  }
+  const pctGlobalArchivos = totalNec > 0 ? Math.round((totalComp / totalNec) * 100) : 0;
+
+  const body = [];
+  let contadorFila = 1;
+
+  function comparaNatural(a, b) {
+    return (a || "").localeCompare(b || "", undefined, { numeric: true, sensitivity: "base" });
+  }
+
+  function mezclarConBlanco(rgb, factor) {
+    return rgb.map((c) => Math.round(c + (255 - c) * factor));
+  }
+
+  const FACTORES_HOJA = [0.72, 0.78, 0.83, 0.87, 0.90, 0.93, 0.96];
+  function colorHoja(nivelVisual) {
+    const factor = FACTORES_HOJA[Math.min(nivelVisual - 1, FACTORES_HOJA.length - 1)];
+    return mezclarConBlanco(NARANJA_HEADER, factor);
+  }
+
+  function empujarFila(c, nivelVisual) {
+    const estado = c.estado || "incompleta";
+    const nombreMostrado = c.nombre || (c.ruta || "").split(" / ").pop() || "-";
+    const sangriaIzq = 2 + Math.max(0, nivelVisual - 1) * 4.5;
+    const fondo = colorHoja(nivelVisual);
+    body.push([
+      { content: String(contadorFila++), styles: { fillColor: fondo, halign: "center" } },
+      { content: nombreMostrado, styles: { fillColor: fondo, cellPadding: { top: 2, right: 2, bottom: 2, left: sangriaIzq } } },
+      {
+        content: ESTADO_LABEL[estado] || estado.toUpperCase(),
+        styles: { fillColor: fondo, textColor: ESTADO_RGB[estado] || [100, 100, 100], fontStyle: "bold", halign: "center" },
+      },
+      { content: c.detalle || "-", styles: { fillColor: fondo } },
+    ]);
+  }
+
+  function empujarSubEncabezado(nombre, nivel) {
+    const factoresPorNivel = [0.40, 0.55, 0.68, 0.78, 0.86, 0.92];
+    const factor = factoresPorNivel[Math.min(nivel - 2, factoresPorNivel.length - 1)];
+    const color = mezclarConBlanco(NARANJA_HEADER, factor);
+    const sangriaIzq = 2 + (nivel - 1) * 4.5;
+    
+    const textoSub = `>  ${nombre}`;
+    const lineasSub = doc.splitTextToSize(textoSub, anchoUtilTabla - sangriaIzq - 4);
+
+    body.push([
+      {
+        content: lineasSub.join("\n"),
+        colSpan: 4,
+        styles: {
+          fillColor: color,
+          textColor: [70, 45, 15],
+          fontStyle: "bold",
+          fontSize: 9.0,
+          halign: "left",
+          overflow: "linebreak",
+          cellPadding: { top: 2.5, right: 2, bottom: 2.5, left: sangriaIzq },
+        },
+      },
+    ]);
+  }
+
+  const NIVEL_MAX_INTERMEDIO = 6;
+  function agruparRecursivo(items, nivelIdx, nivelVisual) {
+    if (nivelIdx > NIVEL_MAX_INTERMEDIO) {
+      const ordenado = [...items].sort((a, b) => comparaNatural(a.nombre, b.nombre));
+      ordenado.forEach((c) => empujarFila(c, nivelVisual));
+      return;
+    }
+
+    const subgrupos = {};
+    let hayNivelMasProfundo = false;
+    for (const c of items) {
+      const partes = (c.ruta || c.nombre || "").split(" / ").filter(Boolean);
+      const clave = partes.length >= nivelIdx + 1 ? partes[nivelIdx] : null;
+      if (clave) hayNivelMasProfundo = true;
+      const key = clave || `__directo__${c.nombre || c.id}`;
+      if (!subgrupos[key]) subgrupos[key] = [];
+      subgrupos[key].push(c);
+    }
+
+    if (!hayNivelMasProfundo) {
+      const ordenado = [...items].sort((a, b) => comparaNatural(a.nombre, b.nombre));
+      ordenado.forEach((c) => empujarFila(c, nivelVisual));
+      return;
+    }
+
+    const entradas = Object.keys(subgrupos).map((key) => ({
+      key,
+      nombreOrden: key.startsWith("__directo__") ? subgrupos[key][0].nombre || "" : key,
+      esGrupo: !key.startsWith("__directo__"),
+    }));
+    entradas.sort((a, b) => comparaNatural(a.nombreOrden, b.nombreOrden));
+
+    for (const entrada of entradas) {
+      if (entrada.esGrupo) {
+        empujarSubEncabezado(entrada.key, nivelIdx);
+        agruparRecursivo(subgrupos[entrada.key], nivelIdx + 1, nivelVisual + 1);
+      } else {
+        const ordenado = [...subgrupos[entrada.key]].sort((a, b) => comparaNatural(a.nombre, b.nombre));
+        ordenado.forEach((c) => empujarFila(c, nivelVisual));
+      }
+    }
+  }
+
+  for (const areaNombre of ordenAreas) {
+    const itemsArea = areasMap[areaNombre];
+    const gruposEsp = {};
+    const ordenEsp = [];
+    for (const c of itemsArea) {
+      const partes = (c.ruta || c.nombre || "").split(" / ").filter(Boolean);
+      const especialidad = partes.length > 1 ? partes[1] : "(raíz)";
+      if (!gruposEsp[especialidad]) {
+        gruposEsp[especialidad] = [];
+        ordenEsp.push(especialidad);
+      }
+      gruposEsp[especialidad].push(c);
+    }
+    ordenEsp.sort((a, b) => comparaNatural(a, b));
+
+    const textoArea = `ÁREA: ${areaNombre.toUpperCase()}`;
+    const lineasArea = doc.splitTextToSize(textoArea, anchoUtilTabla - 6);
+    body.push([
+      {
+        content: lineasArea.join("\n"),
+        colSpan: 4,
+        styles: {
+          fillColor: AZUL_OSCURO,
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 11,
+          halign: "left",
+          overflow: "linebreak",
+          cellPadding: 3.5,
+        },
+      },
+    ]);
+
+    for (const esp of ordenEsp) {
+      body.push([
+        {
+          content: `»  ${esp.toUpperCase()}`,
+          colSpan: 4,
+          styles: {
+            fillColor: NARANJA_HEADER,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9.5,
+            halign: "left",
+            overflow: "linebreak",
+            cellPadding: 2.5,
+          },
+        },
+      ]);
+      agruparRecursivo(gruposEsp[esp], 2, 1);
+    }
+  }
+
+  function dibujarBloqueInstitucional() {
+    let y = 12;
+    if (logoBase64) {
+      const anchoLogo = 13;
+      const altoLogo = 14.6;
+      doc.addImage(logoBase64, "PNG", marginX, y - 3, anchoLogo, altoLogo);
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("GOBIERNO REGIONAL DE PUNO — GERENCIA REGIONAL DE INFRAESTRUCTURA", pageWidth / 2, y, { align: "center" });
+    y += 5;
+    doc.text("SUB GERENCIA DE ESTUDIOS DEFINITIVOS", pageWidth / 2, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(8);
+    
+    const lineasProyecto = doc.splitTextToSize(proyectoNombre, pageWidth - marginX * 2 - 20);
+    doc.text(lineasProyecto, pageWidth / 2, y, { align: "center" });
+    
+    return y + (lineasProyecto.length * 3.8) + 4;
+  }
+
+  function dibujarEncabezadoGlobal() {
+    let y = dibujarBloqueInstitucional();
+
+    doc.setFillColor(...AZUL_OSCURO);
+    doc.rect(marginX, y, pageWidth - marginX * 2, 9, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10.5);
+    doc.text("REPORTE CONSOLIDADO GLOBAL — TODO EL PROYECTO", pageWidth / 2, y + 6.0, { align: "center" });
+    doc.setTextColor(0, 0, 0);
+    y += 15;
+
+    const fecha = new Date().toLocaleString("es-PE");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(`Generado: ${fecha}`, marginX, y);
+    doc.text(`Total Carpetas: ${totalCarpetas}  ·  Completas: ${totalCompletas}`, pageWidth - marginX, y, { align: "right" });
+    return y + 8;
+  }
+
+  let y = dibujarBloqueInstitucional();
 
   doc.setFillColor(...AZUL_OSCURO);
   doc.rect(marginX, y, pageWidth - marginX * 2, 11, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("REPORTE CONSOLIDADO GLOBAL DE AVANCE", pageWidth / 2, y + 7.5, { align: "center" });
+  doc.setFontSize(12);
+  doc.text("CONSOLIDADO GENERAL DE AVANCE DEL PROYECTO", pageWidth / 2, y + 7.5, { align: "center" });
   doc.setTextColor(0, 0, 0);
-  y += 20;
+  y += 18;
 
   const fechaGenerado = new Date().toLocaleString("es-PE");
   doc.setFont("helvetica", "normal");
@@ -386,58 +659,106 @@ export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
   doc.setTextColor(0, 0, 0);
   y += 12;
 
-  const body = [];
-  let contador = 1;
+  const pctCarpetasGlobal = totalCarpetas > 0 ? Math.round((totalCompletas / totalCarpetas) * 100) : 0;
 
-  // Detección automática y flexible de datosAreas (sea objeto, array, u otro formato)
-  let listaAreas = [];
-  if (Array.isArray(datosAreas)) {
-    listaAreas = datosAreas.map((item) => ({
-      nombre: item.nombre || item.area || item.key || "Área",
-      carpetas: item.carpetas || item.items || item.files || (Array.isArray(item) ? item : []),
-    }));
-  } else if (datosAreas && typeof datosAreas === "object") {
-    listaAreas = Object.entries(datosAreas).map(([key, val]) => {
-      let carpetasArr = [];
-      if (Array.isArray(val)) {
-        carpetasArr = val;
-      } else if (val && typeof val === "object") {
-        carpetasArr = val.carpetas || val.items || val.archivos || Object.values(val).find(Array.isArray) || [];
-      }
-      return { nombre: key, carpetas: carpetasArr };
-    });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("AVANCE GLOBAL POR CARPETAS", marginX, y);
+  doc.setFontSize(16);
+  doc.setTextColor(...TEAL);
+  doc.text(`${pctCarpetasGlobal}%`, pageWidth - marginX, y, { align: "right" });
+  doc.setTextColor(0, 0, 0);
+  y += 6;
+
+  doc.setFillColor(20, 37, 41);
+  doc.roundedRect(marginX, y, pageWidth - marginX * 2, 6, 3, 3, "F");
+  const anchoLlenoGlobal = Math.max(6, ((pageWidth - marginX * 2) * Math.min(100, Math.max(0, pctCarpetasGlobal))) / 100);
+  doc.setFillColor(...TEAL);
+  doc.roundedRect(marginX, y, anchoLlenoGlobal, 6, 3, 3, "F");
+  y += 14;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("AVANCE GLOBAL POR ARCHIVOS", marginX, y);
+  doc.setFontSize(16);
+  doc.setTextColor(...TEAL_CLARO);
+  doc.text(`${pctGlobalArchivos}%`, pageWidth - marginX, y, { align: "right" });
+  doc.setTextColor(0, 0, 0);
+  y += 6;
+
+  doc.setFillColor(20, 37, 41);
+  doc.roundedRect(marginX, y, pageWidth - marginX * 2, 6, 3, 3, "F");
+  const anchoLlenoArchivos = Math.max(6, ((pageWidth - marginX * 2) * Math.min(100, Math.max(0, pctGlobalArchivos))) / 100);
+  doc.setFillColor(...TEAL_CLARO);
+  doc.roundedRect(marginX, y, anchoLlenoArchivos, 6, 3, 3, "F");
+  y += 18;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text(`DESGLOSE POR ÁREAS (${ordenAreas.length})`, marginX, y);
+  y += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  for (const areaNombre of ordenAreas) {
+    if (y > pageHeight - 25) {
+      doc.addPage();
+      y = 18;
+    }
+    const itemsArea = areasMap[areaNombre];
+    let areaNec = 0;
+    let areaComp = 0;
+    for (const c of itemsArea) {
+      areaNec += c.archivosNecesarios || 0;
+      areaComp += c.archivosCompletados || 0;
+    }
+    const pctArea = areaNec > 0 ? Math.round((areaComp / areaNec) * 100) : 0;
+    const colorArea = pctArea >= 100 ? VERDE : pctArea >= 50 ? TEAL_CLARO : NARANJA;
+
+    const etiqueta = doc.splitTextToSize(areaNombre, 70)[0];
+    doc.setTextColor(60, 60, 60);
+    doc.text(etiqueta, marginX, y + 3);
+    doc.setTextColor(0, 0, 0);
+
+    const barraX = marginX + 74;
+    const barraAncho = pageWidth - marginX - 22 - barraX;
+    
+    doc.setFillColor(20, 37, 41);
+    doc.roundedRect(barraX, y, barraAncho, 4.5, 2.25, 2.25, "F");
+    const anchoBarraArea = Math.max(4.5, (barraAncho * Math.min(100, Math.max(0, pctArea))) / 100);
+    doc.setFillColor(...colorArea);
+    doc.roundedRect(barraX, y, anchoBarraArea, 4.5, 2.25, 2.25, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...colorArea);
+    doc.text(`${pctArea}%`, pageWidth - marginX, y + 3.3, { align: "right" });
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
+
+    y += 8;
   }
 
-  for (const area of listaAreas) {
-    const areaNombre = area.nombre;
-    const carpetas = area.carpetas;
-
-    if (!Array.isArray(carpetas) || carpetas.length === 0) continue;
-
-    const cantTotal = carpetas.length;
-    const cantCompletas = carpetas.filter((c) => c && (c.estado === "completa" || c.status === "completa")).length;
-    const pctArea = cantTotal > 0 ? Math.round((cantCompletas / cantTotal) * 100) : 0;
-
-    body.push([
-      { content: String(contador++), styles: { halign: "center", fontStyle: "bold" } },
-      { content: String(areaNombre).toUpperCase(), styles: { fontStyle: "bold" } },
-      { content: `${cantCompletas} / ${cantTotal}`, styles: { halign: "center" } },
-      { content: `${pctArea}%`, styles: { halign: "center", fontStyle: "bold", textColor: pctArea >= 100 ? VERDE : TEAL } },
-    ]);
-  }
+  doc.addPage();
+  const primeraPaginaTablaGlobal = doc.internal.getCurrentPageInfo().pageNumber;
+  const startYGlobal = dibujarEncabezadoGlobal();
 
   autoTable(doc, {
-    startY: y,
-    margin: { left: marginX, right: marginX },
-    head: [["N°", "ÁREA / COMPONENTE", "COMPLETADAS / TOTAL", "% AVANCE"]],
+    startY: startYGlobal,
+    margin: { left: marginX, right: marginX, top: startYGlobal },
+    head: [["N°", "DESCRIPCIÓN", "ESTADO", "DETALLE"]],
     body,
-    styles: { fontSize: 9, cellPadding: 3, valign: "middle" },
+    styles: { fontSize: 8.5, cellPadding: 2, valign: "middle", overflow: "linebreak" },
     headStyles: { fillColor: AZUL_OSCURO, textColor: 255, fontStyle: "bold" },
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
-      1: { cellWidth: "auto" },
-      2: { cellWidth: 45, halign: "center" },
-      3: { cellWidth: 30, halign: "center" },
+      1: { cellWidth: 89 },
+      2: { cellWidth: 26, halign: "center" },
+      3: { cellWidth: 55 },
+    },
+    didDrawPage: () => {
+      if (doc.internal.getCurrentPageInfo().pageNumber > primeraPaginaTablaGlobal) {
+        dibujarEncabezadoGlobal();
+      }
     },
   });
 
@@ -446,6 +767,7 @@ export function generarReporteConsolidadoGlobal(datosAreas, opts = {}) {
     doc.setPage(p);
     doc.setFontSize(7.5);
     doc.setTextColor(120, 120, 120);
+    doc.text(`Generado por: ${usuarioFirma}`, marginX, pageHeight - 8);
     doc.text(`Página ${p} de ${totalPaginas}`, pageWidth - marginX, pageHeight - 8, { align: "right" });
     doc.setTextColor(0, 0, 0);
   }
