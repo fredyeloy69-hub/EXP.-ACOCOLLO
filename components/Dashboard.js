@@ -1096,7 +1096,7 @@ export default function Dashboard() {
                             key={c.id}
                             onClick={() => window.open(driveUrl, "_blank", "noopener,noreferrer")}
                             style={{
-                              padding: "10px 16px 10px 24px",
+                              padding: "12px 16px 12px 24px",
                               borderBottom: "1px solid #1a2533",
                               cursor: "pointer",
                             }}
@@ -1354,12 +1354,13 @@ function RutaJerarquica({ ruta, nombre, skipLevels = 0 }) {
         const esUltimo = i === mostrar.length - 1;
         return (
           <span key={i} style={{ display: "inline-flex", alignItems: "baseline", gap: 4 }}>
-            {i > 0 && <span style={{ color: "#457b9d", fontSize: 11 }}>›</span>}
+            {i > 0 && <span style={{ color: "#457b9d", fontSize: 12, fontWeight: 700 }}>›</span>}
             <span
               style={{
-                fontSize: esUltimo ? 14 : 11,
-                fontWeight: esUltimo ? 700 : 500,
-                color: esUltimo ? "#ffffff" : "#a8dadc",
+                fontSize: esUltimo ? 14.5 : 12,
+                fontWeight: esUltimo ? 800 : 600,
+                color: esUltimo ? "#ffffff" : "#e5b80b",
+                textShadow: esUltimo ? "0 1px 2px rgba(0,0,0,.6)" : "none",
               }}
             >
               {p}
