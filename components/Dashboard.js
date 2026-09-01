@@ -227,6 +227,24 @@ export default function Dashboard() {
     }
   }
 
+  async function handleExportarGlobalPorEstado(estadoFiltro) {
+    setExportandoGlobal(true);
+    try {
+      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
+      let carpetasConsolidado = carpetas;
+      if (estadoFiltro === "pendientes") {
+        carpetasConsolidado = carpetas.filter((c) => c.estado !== "completa");
+      } else if (estadoFiltro !== "todas") {
+        carpetasConsolidado = carpetas.filter((c) => c.estado === estadoFiltro);
+      }
+      await generarReporteConsolidadoGlobal("Reporte Consolidado del Proyecto - C.S. ACOCOLLO I-2", carpetasConsolidado, { usuarioFirma });
+    } catch (err) {
+      alert(`No se pudo generar el consolidado: ${err.message}`);
+    } finally {
+      setExportandoGlobal(false);
+    }
+  }
+
   useEffect(() => {
     const unsubResumen = onSnapshot(doc(db, "_meta", "resumen"), (snap) => {
       if (snap.exists()) setResumen(snap.data());
@@ -492,20 +510,27 @@ export default function Dashboard() {
           style={{
             maxWidth: modoPresentacion ? "100%" : 1500,
             margin: "0 auto",
-            padding: modoPresentacion ? "18px 48px" : "16px 28px",
+            padding: modoPresentacion ? "20px 48px" : "18px 28px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexWrap: "wrap",
-            gap: 12,
+            gap: 16,
             color: "#ffffff",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* LOGO AMPLIADO 150% MÁS GRANDE Y SEPARADO DEL TEXTO */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
-              style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
+              style={{
+                width: modoPresentacion ? 110 : 85,
+                height: modoPresentacion ? 122 : 95,
+                flexShrink: 0,
+                marginRight: 6,
+                filter: "drop-shadow(0 0 12px rgba(229,184,11,.4))",
+              }}
             />
             <div>
               <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
@@ -933,7 +958,7 @@ export default function Dashboard() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
-            {/* BOTONES DE FILTRO + BOTONES DE EXPORTAR VISTA ACTUAL AL LADO */}
+            {/* BOTONES DE FILTRO Y BOTONES DE EXPORTAR VISTA ACTUAL JUSTO AL LADO */}
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {ESTADO_OPTIONS.map((opt) => (
                 <button
@@ -952,7 +977,7 @@ export default function Dashboard() {
                 {colapsados.__all ? "▸ Expandir todo" : "▾ Colapsar todo"}
               </button>
 
-              <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginLeft: 4 }}>
                 <button
                   onClick={handleExportarVistaPdf}
                   disabled={exportandoVistaPdf || visibles.length === 0}
