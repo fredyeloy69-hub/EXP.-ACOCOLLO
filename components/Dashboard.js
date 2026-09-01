@@ -170,21 +170,22 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // FUNCIÓN AUXILIAR ACTUALIZADA: Respeta el filtro de estado actual de la pantalla y el selector de exportación
-  function filtrarCarpetasParaExportar(listaCarpetas) {
+  // FUNCIÓN AUXILIAR DE FILTRADO PARA EXPORTAR (Por Área Específica o Global)
+  function filtrarCarpetasParaExportar(listaCarpetas, areaNombre = null) {
     let lista = listaCarpetas;
     
-    if (filtroArea !== "Todas") {
+    // Si se especifica un área concreta (botón de carpeta madre), filtramos por ella
+    if (areaNombre && areaNombre !== "Todas") {
+      lista = lista.filter((c) => (c.area || "Sin área") === areaNombre);
+    } else if (filtroArea !== "Todas") {
+      // Si no, respetamos el filtro global de área seleccionado en la pantalla
       lista = lista.filter((c) => (c.area || "Sin área") === filtroArea);
     }
 
-    if (filtroEstado === "pendientes") {
-      lista = lista.filter((c) => c.estado !== "completa");
-    } else if (filtroEstado !== "todas") {
-      lista = lista.filter((c) => c.estado === filtroEstado);
-    }
-
-    if (tipoExportacion === "incompletas") {
+    // Filtro adicional según el selector desplegable de exportación
+    if (tipoExportacion === "completas") {
+      lista = lista.filter((c) => c.estado === "completa");
+    } else if (tipoExportacion === "incompletas") {
       lista = lista.filter((c) => c.estado === "incompleta");
     } else if (tipoExportacion === "vacias") {
       lista = lista.filter((c) => c.estado === "vacia");
@@ -199,9 +200,9 @@ export default function Dashboard() {
     setExportandoArea(areaNombre);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, areaNombre);
       if (listaFiltrada.length === 0) {
-        alert("No hay carpetas que coincidan con el filtro actual para exportar.");
+        alert("No hay carpetas en esta área que coincidan con el filtro seleccionado para exportar.");
         return;
       }
       generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
@@ -214,7 +215,7 @@ export default function Dashboard() {
     setExportandoGlobal(true);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas, null);
       if (listaFiltrada.length === 0) {
         alert("No hay carpetas que coincidan con el filtro actual para exportar.");
         return;
@@ -233,9 +234,9 @@ export default function Dashboard() {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, areaNombre);
       if (listaFiltrada.length === 0) {
-        alert("No hay carpetas que coincidan con el filtro actual para exportar.");
+        alert("No hay carpetas en esta área que coincidan con el filtro seleccionado para exportar.");
         return;
       }
       await Promise.race([
