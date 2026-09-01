@@ -127,6 +127,7 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
+  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
@@ -135,7 +136,6 @@ export default function Dashboard() {
   const [exportandoArea, setExportandoArea] = useState(null);
   const [exportandoExcelArea, setExportandoExcelArea] = useState(null);
   const [exportandoGlobal, setExportandoGlobal] = useState(false);
-  const [exportandoDirecto, setExportandoDirecto] = useState(null);
   const [modoPresentacion, setModoPresentacion] = useState(false);
   const [historial, setHistorial] = useState([]);
   const [actividadPorDia, setActividadPorDia] = useState({});
@@ -170,76 +170,26 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  function filtrarCarpetasPorEstadoEspecifico(estadoObjetivo, areaNombre = null) {
-    let lista = carpetas;
-    if (areaNombre && areaNombre !== "Todas") {
-      lista = lista.filter((c) => (c.area || "Sin área") === areaNombre);
-    } else if (filtroArea !== "Todas") {
-      lista = lista.filter((c) => (c.area || "Sin área") === filtroArea);
+  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
+  function filtrarCarpetasParaExportar(listaCarpetas) {
+    if (tipoExportacion === "incompletas") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta");
     }
-
-    if (estadoObjetivo === "incompleta") {
-      lista = lista.filter((c) => c.estado === "incompleta");
-    } else if (estadoObjetivo === "completa") {
-      lista = lista.filter((c) => c.estado === "completa");
-    } else if (estadoObjetivo === "vacia") {
-      lista = lista.filter((c) => c.estado === "vacia");
+    if (tipoExportacion === "vacias") {
+      return listaCarpetas.filter((c) => c.estado === "vacia");
     }
-    return lista;
-  }
-
-  async function handleExportarDirectoPDF(estadoObjetivo, etiquetaEstado) {
-    const key = `pdf_${estadoObjetivo}`;
-    setExportandoDirecto(key);
-    try {
-      const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasPorEstadoEspecifico(estadoObjetivo);
-      if (listaFiltrada.length === 0) {
-        alert(`No hay carpetas con estado "${etiquetaEstado}" que coincidan con el área actual.`);
-        return;
-      }
-      const tituloAreaSufijo = filtroArea !== "Todas" ? ` - ${filtroArea}` : " - Global";
-      generarReportePorArea(`Reporte de ${etiquetaEstado}${tituloAreaSufijo}`, listaFiltrada, { usuarioFirma });
-    } catch (err) {
-      alert(`No se pudo generar el PDF: ${err.message}`);
-    } finally {
-      setExportandoDirecto(null);
+    if (tipoExportacion === "incompletas_vacias") {
+      return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
     }
-  }
-
-  async function handleExportarDirectoExcel(estadoObjetivo, etiquetaEstado) {
-    const key = `excel_${estadoObjetivo}`;
-    setExportandoDirecto(key);
-    try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
-      );
-      const listaFiltrada = filtrarCarpetasPorEstadoEspecifico(estadoObjetivo);
-      if (listaFiltrada.length === 0) {
-        alert(`No hay carpetas con estado "${etiquetaEstado}" que coincidan con el área actual.`);
-        return;
-      }
-      const tituloAreaSufijo = filtroArea !== "Todas" ? ` - ${filtroArea}` : " - Global";
-      await Promise.race([
-        generarReporteExcelPorArea(`Reporte de ${etiquetaEstado}${tituloAreaSufijo}`, listaFiltrada),
-        timeoutPromise,
-      ]);
-    } catch (err) {
-      alert(`No se pudo generar el Excel: ${err.message}`);
-    } finally {
-      setExportandoDirecto(null);
-    }
+    return listaCarpetas; // "todas"
   }
 
   function handleExportarArea(areaNombre, carpetasDelArea) {
     setExportandoArea(areaNombre);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      if (carpetasDelArea.length === 0) {
-        alert("No hay carpetas en esta área para exportar.");
-        return;
-      }
-      generarReportePorArea(areaNombre, carpetasDelArea, { usuarioFirma });
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
     } finally {
       setExportandoArea(null);
     }
@@ -249,11 +199,8 @@ export default function Dashboard() {
     setExportandoGlobal(true);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      if (carpetas.length === 0) {
-        alert("No hay carpetas en el sistema para exportar.");
-        return;
-      }
-      generarReporteConsolidadoGlobal(carpetas, { usuarioFirma });
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
     } catch (err) {
       alert(`No se pudo generar el reporte consolidado: ${err.message}`);
     } finally {
@@ -267,12 +214,9 @@ export default function Dashboard() {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
-      if (carpetasDelArea.length === 0) {
-        alert("No hay carpetas en esta área para exportar.");
-        return;
-      }
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
       await Promise.race([
-        generarReporteExcelPorArea(areaNombre, carpetasDelArea),
+        generarReporteExcelPorArea(areaNombre, listaFiltrada),
         timeoutPromise,
       ]);
     } catch (err) {
@@ -984,233 +928,83 @@ export default function Dashboard() {
               }}
             />
 
-            {/* PANEL DE BOTONES DIRECTOS Y ESPECÍFICOS PARA EXPORTAR EN PDF O EXCEL FILTRADOS POR ESTADO */}
+            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
             <div
               style={{
                 background: "#141c24",
-                padding: "14px 16px",
-                borderRadius: 12,
-                border: "2px solid #e5b80b66",
-                marginBottom: 16,
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #e5b80b66",
+                marginBottom: 12,
                 display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                flexWrap: "wrap",
               }}
             >
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#e5b80b", display: "flex", alignItems: "center", gap: 6 }}>
-                <span>⚡</span> Panel de Exportación Directa por Estado (PDF / Excel)
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
-                
-                {/* Incompletas */}
-                <div style={{ background: "#0c1015", padding: "10px", borderRadius: 8, border: "1px solid #e67e2255", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#e67e22" }}>Carpetas Incompletas</span>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => handleExportarDirectoPDF("incompletas", "Incompletas")}
-                      disabled={exportandoDirecto === "pdf_incompletas"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #e5b80b",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "pdf_incompletas" ? "#a8dadc" : "#e5b80b",
-                        cursor: exportandoDirecto === "pdf_incompletas" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📄</span> {exportandoDirecto === "pdf_incompletas" ? "..." : "PDF"}
-                    </button>
-                    <button
-                      onClick={() => handleExportarDirectoExcel("incompletas", "Incompletas")}
-                      disabled={exportandoDirecto === "excel_incompletas"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #2a9d8f",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "excel_incompletas" ? "#a8dadc" : "#2a9d8f",
-                        cursor: exportandoDirecto === "excel_incompletas" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📊</span> {exportandoDirecto === "excel_incompletas" ? "..." : "Excel"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Completas */}
-                <div style={{ background: "#0c1015", padding: "10px", borderRadius: 8, border: "1px solid #e5b80b55", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#e5b80b" }}>Carpetas Completas</span>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => handleExportarDirectoPDF("completa", "Completas")}
-                      disabled={exportandoDirecto === "pdf_completa"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #e5b80b",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "pdf_completa" ? "#a8dadc" : "#e5b80b",
-                        cursor: exportandoDirecto === "pdf_completa" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📄</span> {exportandoDirecto === "pdf_completa" ? "..." : "PDF"}
-                    </button>
-                    <button
-                      onClick={() => handleExportarDirectoExcel("completa", "Completas")}
-                      disabled={exportandoDirecto === "excel_completa"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #2a9d8f",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "excel_completa" ? "#a8dadc" : "#2a9d8f",
-                        cursor: exportandoDirecto === "excel_completa" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📊</span> {exportandoDirecto === "excel_completa" ? "..." : "Excel"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Vacías */}
-                <div style={{ background: "#0c1015", padding: "10px", borderRadius: 8, border: "1px solid #c0392b55", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#c0392b" }}>Carpetas Vacías</span>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      onClick={() => handleExportarDirectoPDF("vacia", "Vacías")}
-                      disabled={exportandoDirecto === "pdf_vacia"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #e5b80b",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "pdf_vacia" ? "#a8dadc" : "#e5b80b",
-                        cursor: exportandoDirecto === "pdf_vacia" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📄</span> {exportandoDirecto === "pdf_vacia" ? "..." : "PDF"}
-                    </button>
-                    <button
-                      onClick={() => handleExportarDirectoExcel("vacia", "Vacías")}
-                      disabled={exportandoDirecto === "excel_vacia"}
-                      style={{
-                        flex: 1,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: "7px 10px",
-                        borderRadius: 6,
-                        border: "1.5px solid #2a9d8f",
-                        background: "#1f2d3d",
-                        color: exportandoDirecto === "excel_vacia" ? "#a8dadc" : "#2a9d8f",
-                        cursor: exportandoDirecto === "excel_vacia" ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <span>📊</span> {exportandoDirecto === "excel_vacia" ? "..." : "Excel"}
-                    </button>
-                  </div>
-                </div>
-
-              </div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
+                ⚙️ Filtro para exportar PDF/Excel:
+              </span>
+              <select
+                value={tipoExportacion}
+                onChange={(e) => setTipoExportacion(e.target.value)}
+                style={{
+                  background: "#0c1015",
+                  color: "#e5b80b",
+                  border: "1.5px solid #e5b80b",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="todas">Todas las carpetas</option>
+                <option value="incompletas">Solo incompletas</option>
+                <option value="vacias">Solo vacías</option>
+                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
+              </select>
             </div>
 
-            {/* BOTONES DE EXPORTAR POR CADA ÁREA */}
-            <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               {areas.map((a) => (
-                <div 
-                  key={a} 
-                  style={{ 
-                    display: "flex", 
-                    gap: 6, 
-                    background: "#141c24", 
-                    padding: "6px 8px", 
-                    borderRadius: 12, 
-                    border: "1.5px solid #e5b80b66",
-                    alignItems: "center",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
-                  }}
-                >
+                <div key={a} style={{ display: "flex", gap: 4 }}>
                   <button
                     onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoArea === a}
                     style={{
                       fontSize: 11,
-                      fontWeight: 700,
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      border: "1.5px solid #e5b80b",
-                      background: "#1f2d3d",
-                      color: exportandoArea === a ? "#a8dadc" : "#e5b80b",
+                      padding: "6px 12px",
+                      borderRadius: "20px 0 0 20px",
+                      border: "1.5px solid #457b9d",
+                      background: "#141c24",
+                      color: exportandoArea === a ? "#a8dadc" : "#ffffff",
+                      fontWeight: 600,
                       cursor: exportandoArea === a ? "not-allowed" : "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      whiteSpace: "nowrap",
                     }}
                     title={`Exportar reporte PDF de ${a}`}
                   >
-                    <span>📄</span> {exportandoArea === a ? "Generando..." : `PDF . ${a.toUpperCase()}`}
+                    📄 {exportandoArea === a ? "Generando..." : `PDF ${a}`}
                   </button>
-
                   <button
                     onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoExcelArea === a}
                     style={{
                       fontSize: 11,
-                      fontWeight: 700,
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      border: "1.5px solid #2a9d8f",
-                      background: "#1f2d3d",
-                      color: exportandoExcelArea === a ? "#a8dadc" : "#2a9d8f",
+                      padding: "6px 12px",
+                      borderRadius: "0 20px 20px 0",
+                      border: "1.5px solid #457b9d",
+                      borderLeft: "none",
+                      background: "#141c24",
+                      color: exportandoExcelArea === a ? "#a8dadc" : "#e5b80b",
+                      fontWeight: 600,
                       cursor: exportandoExcelArea === a ? "not-allowed" : "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      whiteSpace: "nowrap",
                     }}
                     title={`Exportar reporte Excel de ${a}`}
                   >
-                    <span>📊</span> {exportandoExcelArea === a ? "Generando..." : "Excel"}
+                    📊 {exportandoExcelArea === a ? "Generando..." : "Excel"}
                   </button>
                 </div>
               ))}
