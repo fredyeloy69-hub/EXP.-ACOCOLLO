@@ -510,37 +510,37 @@ export default function Dashboard() {
           style={{
             maxWidth: modoPresentacion ? "100%" : 1500,
             margin: "0 auto",
-            padding: modoPresentacion ? "22px 48px" : "20px 28px",
+            padding: modoPresentacion ? "28px 48px" : "26px 28px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 16,
+            gap: 24,
             color: "#ffffff",
           }}
         >
-          {/* LOGO AMPLIADO 200% MÁS GRANDE Y CON AMPLIA SEPARACIÓN */}
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          {/* LOGO AMPLIADO EL DOBLE EXACTO (X2) Y SEPARADO */}
+          <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
               style={{
-                width: modoPresentacion ? 135 : 110,
-                height: modoPresentacion ? 150 : 122,
+                width: modoPresentacion ? 220 : 170,
+                height: modoPresentacion ? 244 : 188,
                 flexShrink: 0,
-                marginRight: 10,
-                filter: "drop-shadow(0 0 16px rgba(229,184,11,.5))",
+                marginRight: 16,
+                filter: "drop-shadow(0 0 22px rgba(229,184,11,.6))",
               }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 38 : 25, marginBottom: 6, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
-              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
+              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 6, fontSize: modoPresentacion ? 17 : 14.5 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
-                <p style={{ color: "#e5b80b", fontSize: 11, marginTop: 0, fontWeight: 700 }}>
+                <p style={{ color: "#e5b80b", fontSize: 11.5, marginTop: 0, fontWeight: 700 }}>
                   Última sincronización: {tiempoRelativo(resumen.ultimaSync.toDate())}
                   {usuarioGoogle && <span style={{ marginLeft: 8, color: "#457b9d" }}>· {usuarioGoogle.email}</span>}
                 </p>
