@@ -131,7 +131,7 @@ export default function Dashboard() {
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
-  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador para el modal de marcadas
+  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador interactivo en modal de marcadas
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
@@ -334,7 +334,7 @@ export default function Dashboard() {
     .filter((c) => c.forzada)
     .sort((a, b) => new Date(b.marcadoEn || 0) - new Date(a.marcadoEn || 0));
 
-  // Filtrar carpetas marcadas en tiempo real con el buscador del modal
+  // Filtrado en tiempo real de carpetas marcadas en el modal
   const carpetasForzadasFiltradas = busquedaMarcadas.trim()
     ? carpetasForzadas.filter((c) =>
         (c.nombre || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase()) ||
@@ -1230,7 +1230,7 @@ export default function Dashboard() {
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
                               <span style={{ fontSize: 11, color: "#a8dadc" }}>{detalle}</span>
-                              {/* 🔄 BOTÓN DINÁMICO: MARCAR COMPLETA O INCOMPLETA */}
+                              {/* 🔄 BOTÓN DINÁMICO BIDIRECCIONAL: MARCAR COMPLETA O INCOMPLETA */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
