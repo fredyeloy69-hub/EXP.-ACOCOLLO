@@ -176,6 +176,9 @@ export default function Dashboard() {
 
   function filtrarCarpetasParaExportar(listaCarpetas, tipoForzado) {
     const filtroUsado = tipoForzado || tipoExportacion;
+    if (filtroUsado === "completas") {
+      return listaCarpetas.filter((c) => c.estado === "completa");
+    }
     if (filtroUsado === "incompletas") {
       return listaCarpetas.filter((c) => c.estado === "incompleta");
     }
@@ -594,6 +597,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", gap: 6 }}>
               {[
                 { id: "todas", label: "📂 Todas", color: "#457b9d" },
+                { id: "completas", label: "✅ Completas", color: "#2a9d8f" },
                 { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
                 { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
                 { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
