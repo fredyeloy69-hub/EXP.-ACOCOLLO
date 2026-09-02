@@ -131,7 +131,7 @@ export default function Dashboard() {
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
-  const [busquedaMarcadas, setBusquedaMarcadas] = useState("");
+  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador para el modal de marcadas
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
@@ -244,7 +244,7 @@ export default function Dashboard() {
       motivo = window.prompt("¿Por qué se marca como completa manualmente?", "");
       if (motivo === null) return;
     } else {
-      motivo = window.prompt("¿Por qué se desmarca o se marca como incompleta?", "");
+      motivo = window.prompt("¿Por qué se marca como incompleta o se desmarca?", "");
       if (motivo === null) return;
     }
 
@@ -334,6 +334,7 @@ export default function Dashboard() {
     .filter((c) => c.forzada)
     .sort((a, b) => new Date(b.marcadoEn || 0) - new Date(a.marcadoEn || 0));
 
+  // Filtrar carpetas marcadas en tiempo real con el buscador del modal
   const carpetasForzadasFiltradas = busquedaMarcadas.trim()
     ? carpetasForzadas.filter((c) =>
         (c.nombre || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase()) ||
@@ -1229,7 +1230,7 @@ export default function Dashboard() {
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
                               <span style={{ fontSize: 11, color: "#a8dadc" }}>{detalle}</span>
-                              {/* 🔄 BOTÓN DINÁMICO: PERMITE MARCAR COMO COMPLETA O INCOMPLETA SEGÚN EL ESTADO */}
+                              {/* 🔄 BOTÓN DINÁMICO: MARCAR COMPLETA O INCOMPLETA */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1444,6 +1445,7 @@ export default function Dashboard() {
               </button>
             </div>
 
+            {/* 🔍 BUSCADOR DENTRO DEL MODAL DE CARPETAS MARCADAS */}
             <div style={{ padding: "16px 26px 0" }}>
               <input
                 type="text"
@@ -1486,7 +1488,6 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 16 }}>{c.nombre}</div>
                         <div style={{ fontSize: 13.5, color: "#a8dadc", marginTop: 3 }}>{c.ruta}</div>
                       </div>
-                      {/* Botón dentro del modal de marcadas también actualizado para permitir desmarcar o cambiar */}
                       <button
                         onClick={() => handleMarcarCompleta(c.id, false, c.nombre, c.ruta)}
                         disabled={marcandoId === c.id}
