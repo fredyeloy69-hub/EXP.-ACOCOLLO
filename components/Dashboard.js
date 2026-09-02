@@ -131,6 +131,7 @@ export default function Dashboard() {
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
+  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador específico para carpetas marcadas
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
@@ -333,6 +334,14 @@ export default function Dashboard() {
     .filter((c) => c.forzada)
     .sort((a, b) => new Date(b.marcadoEn || 0) - new Date(a.marcadoEn || 0));
 
+  // Filtrar carpetas marcadas según el buscador del modal
+  const carpetasForzadasFiltradas = busquedaMarcadas.trim()
+    ? carpetasForzadas.filter((c) =>
+        (c.nombre || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase()) ||
+        (c.ruta || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase())
+      )
+    : carpetasForzadas;
+
   const areaStats = {};
   const especialidadPorArea = {};
   for (const c of carpetas) {
@@ -426,7 +435,7 @@ export default function Dashboard() {
           top: 0;
           z-index: 40;
           backdrop-filter: blur(12px);
-          background: rgba(12,16,21,.96);
+          background: rgba(12,16,21,.98);
           border-bottom: 3.5px solid #e5b80b;
           box-shadow: 0 6px 25px rgba(0,0,0,.7);
         }
@@ -521,6 +530,7 @@ export default function Dashboard() {
         }
       `}</style>
 
+      {/* ENCABEZADO SUPERIOR FIJO */}
       <div className="acocollo-header-sticky">
         <div
           style={{
@@ -529,9 +539,9 @@ export default function Dashboard() {
             padding: modoPresentacion ? "18px 48px" : "16px 28px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexWrap: "wrap",
-            gap: 12,
+            gap: 16,
             color: "#ffffff",
           }}
         >
@@ -539,13 +549,13 @@ export default function Dashboard() {
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
-              style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
+              style={{ width: modoPresentacion ? 52 : 42, height: modoPresentacion ? 58 : 48, flexShrink: 0 }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 36 : 22, marginBottom: 2, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
-              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
+              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 2, fontSize: 13 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
@@ -556,177 +566,131 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+
+          {/* PANEL DE BOTONES DE EXPORTACIÓN POR FILTROS */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, #1f2d3d, #141c24)",
+              border: "2px solid #e5b80b",
+              borderRadius: 14,
+              padding: "10px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              boxShadow: "0 0 20px rgba(229,184,11,0.3)",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#e5b80b" }}>
+              ⚙️ EXPORTAR FILTRO:
+            </span>
+            <div style={{ display: "flex", gap: 6 }}>
+              {[
+                { id: "todas", label: "📂 Todas", color: "#457b9d" },
+                { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
+                { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
+                { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setTipoExportacion(f.id)}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: "6px 10px",
+                    borderRadius: 16,
+                    border: `1.5px solid ${tipoExportacion === f.id ? f.color : "#457b9d"}`,
+                    background: tipoExportacion === f.id ? f.color + "44" : "#0c1015",
+                    color: tipoExportacion === f.id ? f.color : "#ffffff",
+                    cursor: "pointer",
+                  }}
+                >
+                  {f.label} {tipoExportacion === f.id ? "✓" : ""}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => handleExportarGlobal(tipoExportacion)}
+              disabled={exportandoGlobal || carpetas.length === 0}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 800,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "2px solid #e5b80b",
+                background: "#e5b80b",
+                color: "#0c1015",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                whiteSpace: "nowrap",
+              }}
+              title="Exportar Reporte Global con el filtro seleccionado"
+            >
+              <span>📑</span> {exportandoGlobal ? "Generando..." : `PDF Global (${tipoExportacion.toUpperCase()})`}
+            </button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {carpetasForzadas.length > 0 && (
               <button
                 onClick={() => setMostrarMarcadas(true)}
                 style={{
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: 700,
-                  padding: "14px 18px",
-                  borderRadius: 14,
+                  padding: "10px 14px",
+                  borderRadius: 12,
                   border: "2px solid #e5b80b",
                   background: "#141c24",
                   color: "#e5b80b",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  whiteSpace: "nowrap",
+                  gap: 6,
                 }}
               >
-                <span style={{ fontSize: 16 }}>✓</span>
-                Marcadas manualmente ({carpetasForzadas.length})
+                <span>✓</span> Marcadas ({carpetasForzadas.length})
               </button>
             )}
 
             <button
-              onClick={() => handleExportarGlobal("todas")}
-              disabled={exportandoGlobal || carpetas.length === 0}
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                padding: "14px 18px",
-                borderRadius: 14,
-                border: "2px solid #e5b80b",
-                background: "#141c24",
-                color: exportandoGlobal ? "#a8dadc" : "#e5b80b",
-                cursor: exportandoGlobal || carpetas.length === 0 ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                whiteSpace: "nowrap",
-              }}
-              title="Generar PDF consolidado de todo el proyecto"
-            >
-              <span style={{ fontSize: 16 }}>📑</span>
-              {exportandoGlobal ? "Generando Global..." : "Reporte Consolidado PDF"}
-            </button>
-
-            <button
               onClick={() => setModoPresentacion((v) => !v)}
               style={{
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: 700,
-                padding: "14px 20px",
-                borderRadius: 14,
-                border: modoPresentacion ? "2.5px solid #e5b80b" : "1.5px solid #457b9d",
+                padding: "10px 14px",
+                borderRadius: 12,
+                border: modoPresentacion ? "2px solid #e5b80b" : "1.5px solid #457b9d",
                 background: modoPresentacion ? "#e5b80b33" : "#141c24",
                 color: modoPresentacion ? "#e5b80b" : "#ffffff",
                 cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                whiteSpace: "nowrap",
               }}
             >
-              <span style={{ fontSize: 18 }}>🖥</span>
-              {modoPresentacion ? "Salir de presentación" : "Modo presentación"}
+              {modoPresentacion ? "Salir pres." : "🖥 Presentación"}
             </button>
-            <div style={{ textAlign: "right" }}>
-              <button
-                onClick={handleSync}
-                disabled={sincronizando}
-                style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  padding: "22px 42px",
-                  borderRadius: 16,
-                  border: "2.5px solid #e5b80b",
-                  background: sincronizando ? "#141c24" : "linear-gradient(90deg,#e5b80b55,#1f2d3d55)",
-                  color: sincronizando ? "#a8dadc" : "#e5b80b",
-                  cursor: sincronizando ? "not-allowed" : "pointer",
-                  boxShadow: sincronizando ? "none" : "0 0 35px rgba(229,184,11,.6)",
-                  letterSpacing: 0.3,
-                }}
-              >
-                {sincronizando ? "⟳ Sincronizando..." : "⟳ Sincronizar ahora"}
-              </button>
-              {mensajeSync && (
-                <p
-                  style={{
-                    fontSize: 11,
-                    marginTop: 6,
-                    color: mensajeSync.tipo === "ok" ? "#e5b80b" : "#e76f51",
-                  }}
-                >
-                  {mensajeSync.texto}
-                </p>
-              )}
-            </div>
+
+            <button
+              onClick={handleSync}
+              disabled={sincronizando}
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                padding: "10px 18px",
+                borderRadius: 12,
+                border: "2px solid #e5b80b",
+                background: sincronizando ? "#141c24" : "linear-gradient(90deg,#e5b80b55,#1f2d3d55)",
+                color: sincronizando ? "#a8dadc" : "#e5b80b",
+                cursor: sincronizando ? "not-allowed" : "pointer",
+              }}
+            >
+              {sincronizando ? "⟳ Sinc..." : "⟳ Sincronizar"}
+            </button>
           </div>
         </div>
       </div>
 
       <div style={{ maxWidth: modoPresentacion ? "100%" : 1500, margin: "0 auto", padding: modoPresentacion ? "24px 48px 36px" : "24px 28px 32px", color: "#ffffff" }}>
-
-        {/* 🚀 PANEL SUPERIOR DESTACADO: SELECTOR Y BOTONES DE EXPORTACIÓN POR FILTROS */}
-        <div
-          style={{
-            background: "linear-gradient(135deg, #1f2d3d, #141c24)",
-            border: "3px solid #e5b80b",
-            borderRadius: 16,
-            padding: "22px 26px",
-            marginBottom: 28,
-            boxShadow: "0 8px 30px rgba(229,184,11,0.3)",
-          }}
-        >
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#e5b80b", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 22 }}>🎯</span> EXPORTAR REPORTES (PDF Y EXCEL) SEGÚN FILTRO:
-          </div>
-          <div style={{ fontSize: 13, color: "#a8dadc", marginBottom: 16 }}>
-            Elige qué tipo de carpetas deseas incluir en las descargas globales o por área:
-          </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-            {[
-              { id: "todas", label: "📂 Todas las carpetas", color: "#457b9d" },
-              { id: "incompletas", label: "⚠️ Solo Incompletas", color: "#e67e22" },
-              { id: "vacias", label: "❌ Solo Vacías", color: "#c0392b" },
-              { id: "incompletas_vacias", label: "🚨 Incompletas y Vacías", color: "#e5b80b" },
-            ].map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setTipoExportacion(f.id)}
-                style={{
-                  fontSize: 14,
-                  fontWeight: 800,
-                  padding: "12px 20px",
-                  borderRadius: 24,
-                  border: `2.5px solid ${tipoExportacion === f.id ? f.color : "#457b9d"}`,
-                  background: tipoExportacion === f.id ? f.color + "33" : "#0c1015",
-                  color: tipoExportacion === f.id ? f.color : "#ffffff",
-                  cursor: "pointer",
-                  boxShadow: tipoExportacion === f.id ? `0 0 16px ${f.color}88` : "none",
-                }}
-              >
-                {f.label} {tipoExportacion === f.id ? "✓" : ""}
-              </button>
-            ))}
-
-            <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-              <button
-                onClick={() => handleExportarGlobal(tipoExportacion)}
-                disabled={exportandoGlobal || carpetas.length === 0}
-                style={{
-                  fontSize: 14,
-                  fontWeight: 800,
-                  padding: "12px 22px",
-                  borderRadius: 12,
-                  border: "2.5px solid #e5b80b",
-                  background: "#e5b80b",
-                  color: "#0c1015",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  boxShadow: "0 0 20px rgba(229,184,11,0.5)",
-                }}
-              >
-                <span>📑</span> {exportandoGlobal ? "Generando..." : `Exportar Global (${tipoExportacion.toUpperCase()})`}
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Barra de progreso */}
         <div
@@ -1423,7 +1387,7 @@ export default function Dashboard() {
 
       {mostrarMarcadas && (
         <div
-          onClick={() => setMostrarMarcadas(false)}
+          onClick={() => { setMostrarMarcadas(false); setBusquedaMarcadas(""); }}
           style={{
             position: "fixed",
             inset: 0,
@@ -1463,7 +1427,7 @@ export default function Dashboard() {
                 ✓ Carpetas marcadas manualmente ({carpetasForzadas.length})
               </div>
               <button
-                onClick={() => setMostrarMarcadas(false)}
+                onClick={() => { setMostrarMarcadas(false); setBusquedaMarcadas(""); }}
                 style={{
                   fontSize: 14,
                   padding: "7px 14px",
@@ -1477,13 +1441,35 @@ export default function Dashboard() {
                 ✕ Cerrar
               </button>
             </div>
+
+            {/* 🔍 BUSCADOR DENTRO DEL MODAL DE CARPETAS MARCADAS */}
+            <div style={{ padding: "16px 26px 0" }}>
+              <input
+                type="text"
+                value={busquedaMarcadas}
+                onChange={(e) => setBusquedaMarcadas(e.target.value)}
+                placeholder="🔍 Buscar carpeta marcada por nombre o ruta..."
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "#0c1015",
+                  color: "#ffffff",
+                  border: "1.5px solid #e5b80b",
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  outline: "none",
+                }}
+              />
+            </div>
+
             <div style={{ overflowY: "auto", padding: "16px 26px 26px" }}>
-              {carpetasForzadas.length === 0 ? (
-                <div style={{ color: "#a8dadc", fontSize: 15, padding: "24px 0" }}>
-                  No hay ninguna carpeta marcada manualmente todavía.
+              {carpetasForzadasFiltradas.length === 0 ? (
+                <div style={{ color: "#a8dadc", fontSize: 15, padding: "24px 0", textAlign: "center" }}>
+                  {carpetasForzadas.length === 0 ? "No hay ninguna carpeta marcada manualmente todavía." : "No se encontró ninguna carpeta con ese nombre o ruta."}
                 </div>
               ) : (
-                carpetasForzadas.map((c) => (
+                carpetasForzadasFiltradas.map((c) => (
                   <div
                     key={c.id}
                     style={{
