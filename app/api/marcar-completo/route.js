@@ -4,9 +4,13 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { fechaLimaISO } from "@/lib/syncEngine";
 
-// Marca (o desmarca) una carpeta como "completa" manualmente — para casos
-// excepcionales donde no aplica tener un editable (ej. documentos escaneados
-// donde solo existe el PDF del trámite, sin Word/Excel/DWG/RVT de origen).
+// Marca (o desmarca) una carpeta manualmente como "completa" o "incompleta" —
+// para casos excepcionales donde no aplica tener un editable (ej. documentos
+// escaneados donde solo existe el PDF del trámite), o para revertir un
+// estado calculado automáticamente que el evaluador considera incorrecto.
+//
+// `estado` acepta: "completa" | "incompleta" | null (quita el forzado y deja
+// que el próximo sync recalcule el estado real según los archivos).
 //
 // IMPORTANTE: el usuario NUNCA se toma de un texto que mande el navegador —
 // se exige un idToken de Firebase Auth (login real con Google) y se verifica
@@ -24,10 +28,16 @@ import { fechaLimaISO } from "@/lib/syncEngine";
 // entre después puede ver quién marcó o desmarcó qué, y por qué.
 export async function POST(request) {
   try {
-    const { folderId, forzada, motivo, idToken, folderName, folderRuta } = await request.json();
+    const { folderId, estado, motivo, idToken, folderName, folderRuta } = await request.json();
 
     if (!folderId) {
       return NextResponse.json({ error: "Falta folderId" }, { status: 400 });
+    }
+    if (estado !== "completa" && estado !== "incompleta" && estado !== null) {
+      return NextResponse.json(
+        { error: "estado debe ser 'completa', 'incompleta' o null" },
+        { status: 400 }
+      );
     }
     if (!idToken) {
       return NextResponse.json({ error: "Falta iniciar sesión con Google" }, { status: 401 });
@@ -53,9 +63,10 @@ export async function POST(request) {
     const now = new Date();
     const nowISO = now.toISOString();
 
-    if (forzada) {
+    if (estado === "completa" || estado === "incompleta") {
       await overrideRef.set({
         forzada: true,
+        estadoForzado: estado,
         motivo: motivo || "",
         marcadoPor: nombreUsuario,
         marcadoPorEmail: decoded.email || null,
@@ -66,9 +77,10 @@ export async function POST(request) {
         .doc(folderId)
         .set(
           {
-            estado: "completa",
-            detalle: `Marcada manualmente como completa${motivo ? ` — ${motivo}` : ""}`,
+            estado,
+            detalle: `Marcada manualmente como ${estado}${motivo ? ` — ${motivo}` : ""}`,
             forzada: true,
+            estadoForzado: estado,
             marcadoPor: nombreUsuario,
             marcadoPorEmail: decoded.email || null,
             motivo: motivo || "",
@@ -82,7 +94,14 @@ export async function POST(request) {
         .collection("carpetas")
         .doc(folderId)
         .set(
-          { forzada: false, marcadoPor: null, marcadoPorEmail: null, motivo: null, marcadoEn: null },
+          {
+            forzada: false,
+            estadoForzado: null,
+            marcadoPor: null,
+            marcadoPorEmail: null,
+            motivo: null,
+            marcadoEn: null,
+          },
           { merge: true }
         );
       // Nota: el estado real (completa/incompleta/vacía) según los archivos
@@ -90,7 +109,12 @@ export async function POST(request) {
     }
 
     // --- Registrar el evento para que se vea en "Actividad reciente" ---
-    const tipoEvento = forzada ? "carpeta_marcada_completa" : "carpeta_desmarcada";
+    const tipoEvento =
+      estado === "completa"
+        ? "carpeta_marcada_completa"
+        : estado === "incompleta"
+        ? "carpeta_marcada_incompleta"
+        : "carpeta_desmarcada";
     await adminDb.collection("eventos").add({
       tipo: tipoEvento,
       item: nombreCarpeta,
