@@ -775,7 +775,7 @@ export default function Dashboard() {
                   fontSize: 11,
                   padding: "5px 12px",
                   borderRadius: 16,
-                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#e5b80b" : "#457b9d"}`,
+                  border: `1.5px solid ${rangoDiasHeatmap === btn.val ? "#e5b80b" : "#457b9d"}`,
                   background: rangoDiasHeatmap === btn.val ? "#e5b80b33" : "#141c24",
                   color: rangoDiasHeatmap === btn.val ? "#e5b80b" : "#a8dadc",
                   fontWeight: 600,
