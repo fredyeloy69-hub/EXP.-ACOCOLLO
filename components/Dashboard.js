@@ -64,8 +64,7 @@ const EVENTO_LABEL = {
   carpeta_borrada: "borró la carpeta",
   carpeta_movida: "movió la carpeta",
   carpeta_marcada_completa: "marcó como completa",
-  carpeta_marcada_incompleta: "marcó como incompleta",
-  carpeta_desmarcada: "revirtió la marca de",
+  carpeta_desmarcada: "desmarcó",
 };
 
 const EVENTO_COLOR = {
@@ -76,8 +75,7 @@ const EVENTO_COLOR = {
   carpeta_borrada: "#c0392b",
   carpeta_movida: "#e67e22",
   carpeta_marcada_completa: "#e5b80b",
-  carpeta_marcada_incompleta: "#e67e22",
-  carpeta_desmarcada: "#457b9d",
+  carpeta_desmarcada: "#e67e22",
 };
 
 const EVENTO_ICONO = {
@@ -88,7 +86,6 @@ const EVENTO_ICONO = {
   carpeta_borrada: "✕",
   carpeta_movida: "⇄",
   carpeta_marcada_completa: "✓",
-  carpeta_marcada_incompleta: "⚠",
   carpeta_desmarcada: "↺",
 };
 
@@ -176,9 +173,6 @@ export default function Dashboard() {
 
   function filtrarCarpetasParaExportar(listaCarpetas, tipoForzado) {
     const filtroUsado = tipoForzado || tipoExportacion;
-    if (filtroUsado === "completas") {
-      return listaCarpetas.filter((c) => c.estado === "completa");
-    }
     if (filtroUsado === "incompletas") {
       return listaCarpetas.filter((c) => c.estado === "incompleta");
     }
@@ -233,8 +227,7 @@ export default function Dashboard() {
     }
   }
 
-  // estado: "completa" | "incompleta" | null (null = revertir al cálculo automático)
-  async function handleMarcarCompleta(folderId, estado, folderName, folderRuta) {
+  async function handleMarcarCompleta(folderId, forzada, folderName, folderRuta) {
     let user = auth.currentUser;
     if (!user) {
       try {
@@ -247,14 +240,11 @@ export default function Dashboard() {
     }
 
     let motivo = "";
-    if (estado === "completa") {
+    if (forzada) {
       motivo = window.prompt("¿Por qué se marca como completa manualmente?", "");
       if (motivo === null) return;
-    } else if (estado === "incompleta") {
-      motivo = window.prompt("¿Por qué se marca como incompleta manualmente?", "");
-      if (motivo === null) return;
     } else {
-      motivo = window.prompt("¿Por qué se revierte esta marca manual? (opcional)", "");
+      motivo = window.prompt("¿Por qué se marca como incompleta o se desmarca?", "");
       if (motivo === null) return;
     }
 
@@ -264,7 +254,7 @@ export default function Dashboard() {
       const res = await fetch("/api/marcar-completo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folderId, estado, motivo, idToken, folderName, folderRuta }),
+        body: JSON.stringify({ folderId, forzada, motivo, idToken, folderName, folderRuta }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -597,7 +587,6 @@ export default function Dashboard() {
             <div style={{ display: "flex", gap: 6 }}>
               {[
                 { id: "todas", label: "📂 Todas", color: "#457b9d" },
-                { id: "completas", label: "✅ Completas", color: "#2a9d8f" },
                 { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
                 { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
                 { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
@@ -1245,7 +1234,7 @@ export default function Dashboard() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMarcarCompleta(c.id, esCompleta ? "incompleta" : "completa", c.nombre, c.ruta);
+                                  handleMarcarCompleta(c.id, !esCompleta, c.nombre, c.ruta);
                                 }}
                                 disabled={marcandoId === c.id}
                                 style={{
@@ -1500,22 +1489,21 @@ export default function Dashboard() {
                         <div style={{ fontSize: 13.5, color: "#a8dadc", marginTop: 3 }}>{c.ruta}</div>
                       </div>
                       <button
-                        onClick={() => handleMarcarCompleta(c.id, null, c.nombre, c.ruta)}
+                        onClick={() => handleMarcarCompleta(c.id, false, c.nombre, c.ruta)}
                         disabled={marcandoId === c.id}
-                        title="Quita la marca manual y deja que el próximo sync calcule el estado real"
                         style={{
                           flexShrink: 0,
                           fontSize: 12,
                           padding: "5px 12px",
                           borderRadius: 20,
-                          border: "1.5px solid #457b9d",
+                          border: "1.5px solid #e67e22",
                           background: "transparent",
-                          color: marcandoId === c.id ? "#457b9d" : "#a8dadc",
+                          color: marcandoId === c.id ? "#457b9d" : "#e67e22",
                           cursor: marcandoId === c.id ? "not-allowed" : "pointer",
                           fontWeight: 700,
                         }}
                       >
-                        {marcandoId === c.id ? "..." : "↺ Revertir marca"}
+                        {marcandoId === c.id ? "..." : "⚠ Marcar incompleta"}
                       </button>
                     </div>
                   </div>
