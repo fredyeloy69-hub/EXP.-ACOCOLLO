@@ -127,7 +127,7 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
-  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
+  const [tipoExportacion, setTipoExportacion] = useState("todas");
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
@@ -170,7 +170,6 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
   function filtrarCarpetasParaExportar(listaCarpetas) {
     if (tipoExportacion === "incompletas") {
       return listaCarpetas.filter((c) => c.estado === "incompleta");
@@ -181,7 +180,7 @@ export default function Dashboard() {
     if (tipoExportacion === "incompletas_vacias") {
       return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
     }
-    return listaCarpetas; // "todas"
+    return listaCarpetas;
   }
 
   function handleExportarArea(areaNombre, carpetasDelArea) {
@@ -928,43 +927,51 @@ export default function Dashboard() {
               }}
             />
 
-            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
+            {/* PANEL PRINCIPAL Y DESTACADO PARA FILTRAR EXPORTACIÓN PDF / EXCEL */}
             <div
               style={{
-                background: "#141c24",
-                padding: "10px 14px",
-                borderRadius: 10,
-                border: "1.5px solid #e5b80b66",
-                marginBottom: 12,
+                background: "linear-gradient(135deg, #1f2d3d, #141c24)",
+                padding: "16px 20px",
+                borderRadius: 14,
+                border: "3px solid #e5b80b",
+                marginBottom: 16,
+                boxShadow: "0 6px 25px rgba(229,184,11,0.25)",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                flexDirection: "column",
                 gap: 10,
-                flexWrap: "wrap",
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
-                ⚙️ Filtro para exportar PDF/Excel:
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18 }}>⚙️</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: "#e5b80b", letterSpacing: 0.3 }}>
+                  CONFIGURACIÓN DE FILTRO PARA EXPORTAR PDF Y EXCEL
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: "#a8dadc", lineHeight: 1.4 }}>
+                Selecciona qué carpetas deseas incluir al generar los reportes de áreas o el reporte global:
+              </div>
               <select
                 value={tipoExportacion}
                 onChange={(e) => setTipoExportacion(e.target.value)}
                 style={{
+                  width: "100%",
+                  boxSizing: "border-box",
                   background: "#0c1015",
                   color: "#e5b80b",
-                  border: "1.5px solid #e5b80b",
-                  borderRadius: 6,
-                  padding: "6px 10px",
-                  fontSize: 12,
-                  fontWeight: 700,
+                  border: "2px solid #e5b80b",
+                  borderRadius: 8,
+                  padding: "12px 14px",
+                  fontSize: 14,
+                  fontWeight: 800,
                   outline: "none",
                   cursor: "pointer",
+                  boxShadow: "inset 0 2px 6px rgba(0,0,0,0.6)",
                 }}
               >
-                <option value="todas">Todas las carpetas</option>
-                <option value="incompletas">Solo incompletas</option>
-                <option value="vacias">Solo vacías</option>
-                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
+                <option value="todas">📂 Todas las carpetas (Completas, incompletas y vacías)</option>
+                <option value="incompletas">⚠️ Solo carpetas Incompletas</option>
+                <option value="vacias">❌ Solo carpetas Vacías</option>
+                <option value="incompletas_vacias">🚨 Incompletas y Vacías juntas (Omitir completas)</option>
               </select>
             </div>
 
@@ -1149,7 +1156,6 @@ export default function Dashboard() {
                           {g.area}
                         </span>
                         <span style={{ color: "#e5b80b", fontSize: 12 }}>›</span>
-                        {/* TÍTULO PRINCIPAL DE LA ESPECIALIDAD RESALTADO EN DORADO CON TEXTO OSCURO */}
                         <span
                           style={{
                             fontSize: 15,
