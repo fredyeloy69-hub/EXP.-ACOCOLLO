@@ -64,7 +64,8 @@ const EVENTO_LABEL = {
   carpeta_borrada: "borró la carpeta",
   carpeta_movida: "movió la carpeta",
   carpeta_marcada_completa: "marcó como completa",
-  carpeta_desmarcada: "desmarcó",
+  carpeta_marcada_incompleta: "marcó como incompleta",
+  carpeta_desmarcada: "revirtió la marca de",
 };
 
 const EVENTO_COLOR = {
@@ -75,7 +76,8 @@ const EVENTO_COLOR = {
   carpeta_borrada: "#c0392b",
   carpeta_movida: "#e67e22",
   carpeta_marcada_completa: "#e5b80b",
-  carpeta_desmarcada: "#e67e22",
+  carpeta_marcada_incompleta: "#e67e22",
+  carpeta_desmarcada: "#457b9d",
 };
 
 const EVENTO_ICONO = {
@@ -86,6 +88,7 @@ const EVENTO_ICONO = {
   carpeta_borrada: "✕",
   carpeta_movida: "⇄",
   carpeta_marcada_completa: "✓",
+  carpeta_marcada_incompleta: "⚠",
   carpeta_desmarcada: "↺",
 };
 
@@ -127,10 +130,11 @@ export default function Dashboard() {
   const [eventos, setEventos] = useState([]);
   const [filtroArea, setFiltroArea] = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("pendientes");
-  const [tipoExportacion, setTipoExportacion] = useState("todas"); // NUEVO: Filtro para exportación
+  const [tipoExportacion, setTipoExportacion] = useState("todas");
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
+  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador interactivo en modal de marcadas
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
@@ -170,36 +174,39 @@ export default function Dashboard() {
     setColapsados((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // FUNCIÓN AUXILIAR PARA FILTRAR CARPETAS SEGÚN LA OPCIÓN DE EXPORTACIÓN
-  function filtrarCarpetasParaExportar(listaCarpetas) {
-    if (tipoExportacion === "incompletas") {
+  function filtrarCarpetasParaExportar(listaCarpetas, tipoForzado) {
+    const filtroUsado = tipoForzado || tipoExportacion;
+    if (filtroUsado === "completas") {
+      return listaCarpetas.filter((c) => c.estado === "completa");
+    }
+    if (filtroUsado === "incompletas") {
       return listaCarpetas.filter((c) => c.estado === "incompleta");
     }
-    if (tipoExportacion === "vacias") {
+    if (filtroUsado === "vacias") {
       return listaCarpetas.filter((c) => c.estado === "vacia");
     }
-    if (tipoExportacion === "incompletas_vacias") {
+    if (filtroUsado === "incompletas_vacias") {
       return listaCarpetas.filter((c) => c.estado === "incompleta" || c.estado === "vacia");
     }
-    return listaCarpetas; // "todas"
+    return listaCarpetas;
   }
 
-  function handleExportarArea(areaNombre, carpetasDelArea) {
+  function handleExportarArea(areaNombre, carpetasDelArea, tipoForzado) {
     setExportandoArea(areaNombre);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, tipoForzado);
       generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
     } finally {
       setExportandoArea(null);
     }
   }
 
-  async function handleExportarGlobal() {
+  async function handleExportarGlobal(tipoForzado) {
     setExportandoGlobal(true);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetas);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas, tipoForzado);
       generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
     } catch (err) {
       alert(`No se pudo generar el reporte consolidado: ${err.message}`);
@@ -208,13 +215,13 @@ export default function Dashboard() {
     }
   }
 
-  async function handleExportarExcelArea(areaNombre, carpetasDelArea) {
+  async function handleExportarExcelArea(areaNombre, carpetasDelArea, tipoForzado) {
     setExportandoExcelArea(areaNombre);
     try {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea);
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, tipoForzado);
       await Promise.race([
         generarReporteExcelPorArea(areaNombre, listaFiltrada),
         timeoutPromise,
@@ -226,24 +233,28 @@ export default function Dashboard() {
     }
   }
 
-  async function handleMarcarCompleta(folderId, forzada, folderName, folderRuta) {
+  // estado: "completa" | "incompleta" | null (null = revertir al cálculo automático)
+  async function handleMarcarCompleta(folderId, estado, folderName, folderRuta) {
     let user = auth.currentUser;
     if (!user) {
       try {
         const cred = await signInWithPopup(auth, new GoogleAuthProvider());
         user = cred.user;
       } catch (err) {
-        alert(`Necesitas iniciar sesión con Google para marcar/desmarcar carpetas. ${err.message || ""}`);
+        alert(`Necesitas iniciar sesión con Google para actualizar carpetas. ${err.message || ""}`);
         return;
       }
     }
 
     let motivo = "";
-    if (forzada) {
-      motivo = window.prompt("¿Por qué se marca como completa?", "");
+    if (estado === "completa") {
+      motivo = window.prompt("¿Por qué se marca como completa manualmente?", "");
+      if (motivo === null) return;
+    } else if (estado === "incompleta") {
+      motivo = window.prompt("¿Por qué se marca como incompleta manualmente?", "");
       if (motivo === null) return;
     } else {
-      motivo = window.prompt("¿Por qué se desmarca?", "");
+      motivo = window.prompt("¿Por qué se revierte esta marca manual? (opcional)", "");
       if (motivo === null) return;
     }
 
@@ -253,7 +264,7 @@ export default function Dashboard() {
       const res = await fetch("/api/marcar-completo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folderId, forzada, motivo, idToken, folderName, folderRuta }),
+        body: JSON.stringify({ folderId, estado, motivo, idToken, folderName, folderRuta }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -332,6 +343,14 @@ export default function Dashboard() {
   const carpetasForzadas = carpetas
     .filter((c) => c.forzada)
     .sort((a, b) => new Date(b.marcadoEn || 0) - new Date(a.marcadoEn || 0));
+
+  // Filtrado en tiempo real de carpetas marcadas en el modal
+  const carpetasForzadasFiltradas = busquedaMarcadas.trim()
+    ? carpetasForzadas.filter((c) =>
+        (c.nombre || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase()) ||
+        (c.ruta || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase())
+      )
+    : carpetasForzadas;
 
   const areaStats = {};
   const especialidadPorArea = {};
@@ -426,7 +445,7 @@ export default function Dashboard() {
           top: 0;
           z-index: 40;
           backdrop-filter: blur(12px);
-          background: rgba(12,16,21,.96);
+          background: rgba(12,16,21,.98);
           border-bottom: 3.5px solid #e5b80b;
           box-shadow: 0 6px 25px rgba(0,0,0,.7);
         }
@@ -521,6 +540,7 @@ export default function Dashboard() {
         }
       `}</style>
 
+      {/* ENCABEZADO SUPERIOR FIJO */}
       <div className="acocollo-header-sticky">
         <div
           style={{
@@ -529,9 +549,9 @@ export default function Dashboard() {
             padding: modoPresentacion ? "18px 48px" : "16px 28px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexWrap: "wrap",
-            gap: 12,
+            gap: 16,
             color: "#ffffff",
           }}
         >
@@ -539,13 +559,13 @@ export default function Dashboard() {
             <img
               src={LOGO_PUNO_BASE64}
               alt="Escudo Gobierno Regional de Puno"
-              style={{ width: modoPresentacion ? 52 : 40, height: modoPresentacion ? 58 : 45, flexShrink: 0 }}
+              style={{ width: modoPresentacion ? 52 : 42, height: modoPresentacion ? 58 : 48, flexShrink: 0 }}
             />
             <div>
-              <h1 style={{ fontSize: modoPresentacion ? 36 : 24, marginBottom: 4, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
+              <h1 style={{ fontSize: modoPresentacion ? 36 : 22, marginBottom: 2, fontWeight: 800, letterSpacing: -0.3, color: "#e5b80b", textShadow: "0 0 18px rgba(229,184,11,.7)" }}>
                 Expediente Técnico — C.S. ACOCOLLO I-2
               </h1>
-              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 4, fontSize: modoPresentacion ? 16 : 14 }}>
+              <p style={{ color: "#a8dadc", marginTop: 0, marginBottom: 2, fontSize: 13 }}>
                 Estado en tiempo real de la carga de documentación
               </p>
               {resumen?.ultimaSync?.toDate && (
@@ -556,104 +576,127 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+
+          {/* PANEL DE BOTONES DE EXPORTACIÓN POR FILTROS */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, #1f2d3d, #141c24)",
+              border: "2px solid #e5b80b",
+              borderRadius: 14,
+              padding: "10px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              boxShadow: "0 0 20px rgba(229,184,11,0.3)",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#e5b80b" }}>
+              ⚙️ EXPORTAR FILTRO:
+            </span>
+            <div style={{ display: "flex", gap: 6 }}>
+              {[
+                { id: "todas", label: "📂 Todas", color: "#457b9d" },
+                { id: "completas", label: "✅ Completas", color: "#2a9d8f" },
+                { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
+                { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
+                { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setTipoExportacion(f.id)}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: "6px 10px",
+                    borderRadius: 16,
+                    border: `1.5px solid ${tipoExportacion === f.id ? f.color : "#457b9d"}`,
+                    background: tipoExportacion === f.id ? f.color + "44" : "#0c1015",
+                    color: tipoExportacion === f.id ? f.color : "#ffffff",
+                    cursor: "pointer",
+                  }}
+                >
+                  {f.label} {tipoExportacion === f.id ? "✓" : ""}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => handleExportarGlobal(tipoExportacion)}
+              disabled={exportandoGlobal || carpetas.length === 0}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 800,
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: "2px solid #e5b80b",
+                background: "#e5b80b",
+                color: "#0c1015",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                whiteSpace: "nowrap",
+              }}
+              title="Exportar Reporte Global con el filtro seleccionado"
+            >
+              <span>📑</span> {exportandoGlobal ? "Generando..." : `PDF Global (${tipoExportacion.toUpperCase()})`}
+            </button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {carpetasForzadas.length > 0 && (
               <button
                 onClick={() => setMostrarMarcadas(true)}
                 style={{
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: 700,
-                  padding: "14px 18px",
-                  borderRadius: 14,
+                  padding: "10px 14px",
+                  borderRadius: 12,
                   border: "2px solid #e5b80b",
                   background: "#141c24",
                   color: "#e5b80b",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  whiteSpace: "nowrap",
+                  gap: 6,
                 }}
               >
-                <span style={{ fontSize: 16 }}>✓</span>
-                Marcadas manualmente ({carpetasForzadas.length})
+                <span>✓</span> Marcadas ({carpetasForzadas.length})
               </button>
             )}
 
             <button
-              onClick={handleExportarGlobal}
-              disabled={exportandoGlobal || carpetas.length === 0}
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                padding: "14px 18px",
-                borderRadius: 14,
-                border: "2px solid #e5b80b",
-                background: "#141c24",
-                color: exportandoGlobal ? "#a8dadc" : "#e5b80b",
-                cursor: exportandoGlobal || carpetas.length === 0 ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                whiteSpace: "nowrap",
-              }}
-              title="Generar PDF consolidado de todo el proyecto"
-            >
-              <span style={{ fontSize: 16 }}>📑</span>
-              {exportandoGlobal ? "Generando Global..." : "Reporte Consolidado PDF"}
-            </button>
-
-            <button
               onClick={() => setModoPresentacion((v) => !v)}
               style={{
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: 700,
-                padding: "14px 20px",
-                borderRadius: 14,
-                border: modoPresentacion ? "2.5px solid #e5b80b" : "1.5px solid #457b9d",
+                padding: "10px 14px",
+                borderRadius: 12,
+                border: modoPresentacion ? "2px solid #e5b80b" : "1.5px solid #457b9d",
                 background: modoPresentacion ? "#e5b80b33" : "#141c24",
                 color: modoPresentacion ? "#e5b80b" : "#ffffff",
                 cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                whiteSpace: "nowrap",
               }}
             >
-              <span style={{ fontSize: 18 }}>🖥</span>
-              {modoPresentacion ? "Salir de presentación" : "Modo presentación"}
+              {modoPresentacion ? "Salir pres." : "🖥 Presentación"}
             </button>
-            <div style={{ textAlign: "right" }}>
-              <button
-                onClick={handleSync}
-                disabled={sincronizando}
-                style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  padding: "22px 42px",
-                  borderRadius: 16,
-                  border: "2.5px solid #e5b80b",
-                  background: sincronizando ? "#141c24" : "linear-gradient(90deg,#e5b80b55,#1f2d3d55)",
-                  color: sincronizando ? "#a8dadc" : "#e5b80b",
-                  cursor: sincronizando ? "not-allowed" : "pointer",
-                  boxShadow: sincronizando ? "none" : "0 0 35px rgba(229,184,11,.6)",
-                  letterSpacing: 0.3,
-                }}
-              >
-                {sincronizando ? "⟳ Sincronizando..." : "⟳ Sincronizar ahora"}
-              </button>
-              {mensajeSync && (
-                <p
-                  style={{
-                    fontSize: 11,
-                    marginTop: 6,
-                    color: mensajeSync.tipo === "ok" ? "#e5b80b" : "#e76f51",
-                  }}
-                >
-                  {mensajeSync.texto}
-                </p>
-              )}
-            </div>
+
+            <button
+              onClick={handleSync}
+              disabled={sincronizando}
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                padding: "10px 18px",
+                borderRadius: 12,
+                border: "2px solid #e5b80b",
+                background: sincronizando ? "#141c24" : "linear-gradient(90deg,#e5b80b55,#1f2d3d55)",
+                color: sincronizando ? "#a8dadc" : "#e5b80b",
+                cursor: sincronizando ? "not-allowed" : "pointer",
+              }}
+            >
+              {sincronizando ? "⟳ Sinc..." : "⟳ Sincronizar"}
+            </button>
           </div>
         </div>
       </div>
@@ -775,7 +818,7 @@ export default function Dashboard() {
                   fontSize: 11,
                   padding: "5px 12px",
                   borderRadius: 16,
-                  border: `1px solid ${rangoDiasHeatmap === btn.val ? "#e5b80b" : "#457b9d"}`,
+                  border: `1.5px solid ${rangoDiasHeatmap === btn.val ? "#e5b80b" : "#457b9d"}`,
                   background: rangoDiasHeatmap === btn.val ? "#e5b80b33" : "#141c24",
                   color: rangoDiasHeatmap === btn.val ? "#e5b80b" : "#a8dadc",
                   fontWeight: 600,
@@ -928,51 +971,11 @@ export default function Dashboard() {
               }}
             />
 
-            {/* SELECTOR DE FILTRO PARA LA EXPORTACIÓN */}
-            <div
-              style={{
-                background: "#141c24",
-                padding: "10px 14px",
-                borderRadius: 10,
-                border: "1.5px solid #e5b80b66",
-                marginBottom: 12,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 10,
-                flexWrap: "wrap",
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc" }}>
-                ⚙️ Filtro para exportar PDF/Excel:
-              </span>
-              <select
-                value={tipoExportacion}
-                onChange={(e) => setTipoExportacion(e.target.value)}
-                style={{
-                  background: "#0c1015",
-                  color: "#e5b80b",
-                  border: "1.5px solid #e5b80b",
-                  borderRadius: 6,
-                  padding: "6px 10px",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  outline: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <option value="todas">Todas las carpetas</option>
-                <option value="incompletas">Solo incompletas</option>
-                <option value="vacias">Solo vacías</option>
-                <option value="incompletas_vacias">Incompletas y vacías (juntas)</option>
-              </select>
-            </div>
-
             <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               {areas.map((a) => (
                 <div key={a} style={{ display: "flex", gap: 4 }}>
                   <button
-                    onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
+                    onClick={() => handleExportarArea(a, carpetasPorArea[a] || [], tipoExportacion)}
                     disabled={exportandoArea === a}
                     style={{
                       fontSize: 11,
@@ -989,7 +992,7 @@ export default function Dashboard() {
                     📄 {exportandoArea === a ? "Generando..." : `PDF ${a}`}
                   </button>
                   <button
-                    onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
+                    onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [], tipoExportacion)}
                     disabled={exportandoExcelArea === a}
                     style={{
                       fontSize: 11,
@@ -1149,7 +1152,6 @@ export default function Dashboard() {
                           {g.area}
                         </span>
                         <span style={{ color: "#e5b80b", fontSize: 12 }}>›</span>
-                        {/* TÍTULO PRINCIPAL DE LA ESPECIALIDAD RESALTADO EN DORADO CON TEXTO OSCURO */}
                         <span
                           style={{
                             fontSize: 15,
@@ -1188,6 +1190,7 @@ export default function Dashboard() {
                       {!grupoColapsado && g.items.map((c, itemIndex) => {
                         const detalle = c.detalle || c.estado;
                         const driveUrl = `https://drive.google.com/drive/folders/${c.id}`;
+                        const esCompleta = c.estado === "completa";
                         return (
                           <div
                             key={c.id}
@@ -1238,25 +1241,27 @@ export default function Dashboard() {
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
                               <span style={{ fontSize: 11, color: "#a8dadc" }}>{detalle}</span>
+                              {/* 🔄 BOTÓN DINÁMICO BIDIRECCIONAL: MARCAR COMPLETA O INCOMPLETA */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMarcarCompleta(c.id, !c.forzada, c.nombre, c.ruta);
+                                  handleMarcarCompleta(c.id, esCompleta ? "incompleta" : "completa", c.nombre, c.ruta);
                                 }}
                                 disabled={marcandoId === c.id}
                                 style={{
                                   fontSize: 10,
-                                  padding: "3px 9px",
+                                  padding: "3px 10px",
                                   borderRadius: 20,
-                                  border: c.forzada ? "1.5px solid #c0392b88" : "1.5px solid #e5b80b88",
+                                  border: esCompleta ? "1.5px solid #e67e22" : "1.5px solid #e5b80b",
                                   background: "transparent",
-                                  color: marcandoId === c.id ? "#457b9d" : c.forzada ? "#a8dadc" : "#ffffff",
+                                  color: marcandoId === c.id ? "#457b9d" : esCompleta ? "#e67e22" : "#ffffff",
                                   cursor: marcandoId === c.id ? "not-allowed" : "pointer",
                                   whiteSpace: "nowrap",
                                   flexShrink: 0,
+                                  fontWeight: 700,
                                 }}
                               >
-                                {marcandoId === c.id ? "..." : c.forzada ? "✕ Desmarcar" : "✓ Marcar completa"}
+                                {marcandoId === c.id ? "..." : esCompleta ? "⚠ Marcar incompleta" : "✓ Marcar completa"}
                               </button>
                             </div>
                           </div>
@@ -1396,7 +1401,7 @@ export default function Dashboard() {
 
       {mostrarMarcadas && (
         <div
-          onClick={() => setMostrarMarcadas(false)}
+          onClick={() => { setMostrarMarcadas(false); setBusquedaMarcadas(""); }}
           style={{
             position: "fixed",
             inset: 0,
@@ -1436,7 +1441,7 @@ export default function Dashboard() {
                 ✓ Carpetas marcadas manualmente ({carpetasForzadas.length})
               </div>
               <button
-                onClick={() => setMostrarMarcadas(false)}
+                onClick={() => { setMostrarMarcadas(false); setBusquedaMarcadas(""); }}
                 style={{
                   fontSize: 14,
                   padding: "7px 14px",
@@ -1450,13 +1455,35 @@ export default function Dashboard() {
                 ✕ Cerrar
               </button>
             </div>
+
+            {/* 🔍 BUSCADOR DENTRO DEL MODAL DE CARPETAS MARCADAS */}
+            <div style={{ padding: "16px 26px 0" }}>
+              <input
+                type="text"
+                value={busquedaMarcadas}
+                onChange={(e) => setBusquedaMarcadas(e.target.value)}
+                placeholder="🔍 Buscar carpeta marcada por nombre o ruta..."
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "#0c1015",
+                  color: "#ffffff",
+                  border: "1.5px solid #e5b80b",
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  outline: "none",
+                }}
+              />
+            </div>
+
             <div style={{ overflowY: "auto", padding: "16px 26px 26px" }}>
-              {carpetasForzadas.length === 0 ? (
-                <div style={{ color: "#a8dadc", fontSize: 15, padding: "24px 0" }}>
-                  No hay ninguna carpeta marcada manualmente todavía.
+              {carpetasForzadasFiltradas.length === 0 ? (
+                <div style={{ color: "#a8dadc", fontSize: 15, padding: "24px 0", textAlign: "center" }}>
+                  {carpetasForzadas.length === 0 ? "No hay ninguna carpeta marcada manualmente todavía." : "No se encontró ninguna carpeta con ese nombre o ruta."}
                 </div>
               ) : (
-                carpetasForzadas.map((c) => (
+                carpetasForzadasFiltradas.map((c) => (
                   <div
                     key={c.id}
                     style={{
@@ -1473,20 +1500,22 @@ export default function Dashboard() {
                         <div style={{ fontSize: 13.5, color: "#a8dadc", marginTop: 3 }}>{c.ruta}</div>
                       </div>
                       <button
-                        onClick={() => handleMarcarCompleta(c.id, false, c.nombre, c.ruta)}
+                        onClick={() => handleMarcarCompleta(c.id, null, c.nombre, c.ruta)}
                         disabled={marcandoId === c.id}
+                        title="Quita la marca manual y deja que el próximo sync calcule el estado real"
                         style={{
                           flexShrink: 0,
                           fontSize: 12,
                           padding: "5px 12px",
                           borderRadius: 20,
-                          border: "1.5px solid #c0392b88",
+                          border: "1.5px solid #457b9d",
                           background: "transparent",
                           color: marcandoId === c.id ? "#457b9d" : "#a8dadc",
                           cursor: marcandoId === c.id ? "not-allowed" : "pointer",
+                          fontWeight: 700,
                         }}
                       >
-                        {marcandoId === c.id ? "..." : "✕ Desmarcar"}
+                        {marcandoId === c.id ? "..." : "↺ Revertir marca"}
                       </button>
                     </div>
                   </div>
