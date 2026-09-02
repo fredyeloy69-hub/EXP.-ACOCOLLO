@@ -195,8 +195,9 @@ export default function Page() {
     setExportandoArea(areaNombre);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, tipoForzado);
-      generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma });
+      const filtroUsado = tipoForzado || tipoExportacion;
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, filtroUsado);
+      generarReportePorArea(areaNombre, listaFiltrada, { usuarioFirma, tipoFiltro: filtroUsado });
     } finally {
       setExportandoArea(null);
     }
@@ -206,8 +207,9 @@ export default function Page() {
     setExportandoGlobal(true);
     try {
       const usuarioFirma = usuarioGoogle?.email || usuarioGoogle?.displayName || "Sistema Acocollo I-2";
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetas, tipoForzado);
-      generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma });
+      const filtroUsado = tipoForzado || tipoExportacion;
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetas, filtroUsado);
+      generarReporteConsolidadoGlobal(listaFiltrada, { usuarioFirma, tipoFiltro: filtroUsado });
     } catch (err) {
       alert(`No se pudo generar el reporte consolidado: ${err.message}`);
     } finally {
@@ -221,9 +223,10 @@ export default function Page() {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
       );
-      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, tipoForzado);
+      const filtroUsado = tipoForzado || tipoExportacion;
+      const listaFiltrada = filtrarCarpetasParaExportar(carpetasDelArea, filtroUsado);
       await Promise.race([
-        generarReporteExcelPorArea(areaNombre, listaFiltrada),
+        generarReporteExcelPorArea(areaNombre, listaFiltrada, filtroUsado),
         timeoutPromise,
       ]);
     } catch (err) {
@@ -947,6 +950,40 @@ export default function Page() {
               }}
             />
 
+            {/* FILTRO PARA EXPORTAR + BOTONES DE EXPORTAR POR ÁREA — juntos, mismo tamaño de texto */}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginBottom: 10,
+                flexWrap: "wrap",
+                alignItems: "center",
+                background: "#141c24",
+                border: "1.5px solid #e5b80b66",
+                borderRadius: 10,
+                padding: "10px 14px",
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#a8dadc", marginRight: 4 }}>
+                ⚙️ EXPORTAR FILTRO:
+              </span>
+              {[
+                { id: "todas", label: "📂 Todas", color: "#457b9d" },
+                { id: "completas", label: "✅ Completas", color: "#2a9d8f" },
+                { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
+                { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
+                { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setTipoExportacion(f.id)}
+                  style={chipStyle(tipoExportacion === f.id, f.color)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               {areas.map((a) => (
                 <div key={a} style={{ display: "flex", gap: 4 }}>
@@ -954,8 +991,8 @@ export default function Page() {
                     onClick={() => handleExportarArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoArea === a}
                     style={{
-                      fontSize: 11,
-                      padding: "6px 12px",
+                      fontSize: 13,
+                      padding: "8px 16px",
                       borderRadius: "20px 0 0 20px",
                       border: "1.5px solid #457b9d",
                       background: "#141c24",
@@ -971,8 +1008,8 @@ export default function Page() {
                     onClick={() => handleExportarExcelArea(a, carpetasPorArea[a] || [])}
                     disabled={exportandoExcelArea === a}
                     style={{
-                      fontSize: 11,
-                      padding: "6px 12px",
+                      fontSize: 13,
+                      padding: "8px 16px",
                       borderRadius: "0 20px 20px 0",
                       border: "1.5px solid #457b9d",
                       borderLeft: "none",
@@ -1028,39 +1065,6 @@ export default function Page() {
               <AreaProgressPanel area={filtroArea} stats={areaStats[filtroArea]} color={colorForArea(filtroArea)} />
             )}
 
-            {/* FILTRO PARA EXPORTAR (afecta a los botones PDF/Excel de esta página) */}
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                marginBottom: 14,
-                flexWrap: "wrap",
-                alignItems: "center",
-                background: "#141c24",
-                border: "1.5px solid #e5b80b66",
-                borderRadius: 10,
-                padding: "10px 14px",
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#a8dadc", marginRight: 4 }}>
-                ⚙️ EXPORTAR FILTRO:
-              </span>
-              {[
-                { id: "todas", label: "📂 Todas", color: "#457b9d" },
-                { id: "completas", label: "✅ Completas", color: "#2a9d8f" },
-                { id: "incompletas", label: "⚠️ Incompletas", color: "#e67e22" },
-                { id: "vacias", label: "❌ Vacías", color: "#c0392b" },
-                { id: "incompletas_vacias", label: "🚨 Inc. + Vacías", color: "#e5b80b" },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setTipoExportacion(f.id)}
-                  style={chipStyle(tipoExportacion === f.id, f.color)}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
 
             {/* BOTONES DE FILTRO Y CONTROL */}
             <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
