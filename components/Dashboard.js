@@ -131,7 +131,7 @@ export default function Dashboard() {
   const [sincronizando, setSincronizando] = useState(false);
   const [mensajeSync, setMensajeSync] = useState(null);
   const [busqueda, setBusqueda] = useState("");
-  const [busquedaMarcadas, setBusquedaMarcadas] = useState(""); // 🔍 Buscador específico para carpetas marcadas
+  const [busquedaMarcadas, setBusquedaMarcadas] = useState("");
   const [colapsados, setColapsados] = useState({});
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
@@ -234,17 +234,17 @@ export default function Dashboard() {
         const cred = await signInWithPopup(auth, new GoogleAuthProvider());
         user = cred.user;
       } catch (err) {
-        alert(`Necesitas iniciar sesión con Google para marcar/desmarcar carpetas. ${err.message || ""}`);
+        alert(`Necesitas iniciar sesión con Google para actualizar carpetas. ${err.message || ""}`);
         return;
       }
     }
 
     let motivo = "";
     if (forzada) {
-      motivo = window.prompt("¿Por qué se marca como completa?", "");
+      motivo = window.prompt("¿Por qué se marca como completa manualmente?", "");
       if (motivo === null) return;
     } else {
-      motivo = window.prompt("¿Por qué se desmarca?", "");
+      motivo = window.prompt("¿Por qué se desmarca o se marca como incompleta?", "");
       if (motivo === null) return;
     }
 
@@ -334,7 +334,6 @@ export default function Dashboard() {
     .filter((c) => c.forzada)
     .sort((a, b) => new Date(b.marcadoEn || 0) - new Date(a.marcadoEn || 0));
 
-  // Filtrar carpetas marcadas según el buscador del modal
   const carpetasForzadasFiltradas = busquedaMarcadas.trim()
     ? carpetasForzadas.filter((c) =>
         (c.nombre || "").toLowerCase().includes(busquedaMarcadas.trim().toLowerCase()) ||
@@ -1179,6 +1178,7 @@ export default function Dashboard() {
                       {!grupoColapsado && g.items.map((c, itemIndex) => {
                         const detalle = c.detalle || c.estado;
                         const driveUrl = `https://drive.google.com/drive/folders/${c.id}`;
+                        const esCompleta = c.estado === "completa";
                         return (
                           <div
                             key={c.id}
@@ -1229,25 +1229,27 @@ export default function Dashboard() {
                             )}
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10, marginTop: 6 }}>
                               <span style={{ fontSize: 11, color: "#a8dadc" }}>{detalle}</span>
+                              {/* 🔄 BOTÓN DINÁMICO: PERMITE MARCAR COMO COMPLETA O INCOMPLETA SEGÚN EL ESTADO */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMarcarCompleta(c.id, !c.forzada, c.nombre, c.ruta);
+                                  handleMarcarCompleta(c.id, !esCompleta, c.nombre, c.ruta);
                                 }}
                                 disabled={marcandoId === c.id}
                                 style={{
                                   fontSize: 10,
-                                  padding: "3px 9px",
+                                  padding: "3px 10px",
                                   borderRadius: 20,
-                                  border: c.forzada ? "1.5px solid #c0392b88" : "1.5px solid #e5b80b88",
+                                  border: esCompleta ? "1.5px solid #e67e22" : "1.5px solid #e5b80b",
                                   background: "transparent",
-                                  color: marcandoId === c.id ? "#457b9d" : c.forzada ? "#a8dadc" : "#ffffff",
+                                  color: marcandoId === c.id ? "#457b9d" : esCompleta ? "#e67e22" : "#ffffff",
                                   cursor: marcandoId === c.id ? "not-allowed" : "pointer",
                                   whiteSpace: "nowrap",
                                   flexShrink: 0,
+                                  fontWeight: 700,
                                 }}
                               >
-                                {marcandoId === c.id ? "..." : c.forzada ? "✕ Desmarcar" : "✓ Marcar completa"}
+                                {marcandoId === c.id ? "..." : esCompleta ? "⚠ Marcar incompleta" : "✓ Marcar completa"}
                               </button>
                             </div>
                           </div>
@@ -1442,7 +1444,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* 🔍 BUSCADOR DENTRO DEL MODAL DE CARPETAS MARCADAS */}
             <div style={{ padding: "16px 26px 0" }}>
               <input
                 type="text"
@@ -1485,6 +1486,7 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 16 }}>{c.nombre}</div>
                         <div style={{ fontSize: 13.5, color: "#a8dadc", marginTop: 3 }}>{c.ruta}</div>
                       </div>
+                      {/* Botón dentro del modal de marcadas también actualizado para permitir desmarcar o cambiar */}
                       <button
                         onClick={() => handleMarcarCompleta(c.id, false, c.nombre, c.ruta)}
                         disabled={marcandoId === c.id}
@@ -1493,13 +1495,14 @@ export default function Dashboard() {
                           fontSize: 12,
                           padding: "5px 12px",
                           borderRadius: 20,
-                          border: "1.5px solid #c0392b88",
+                          border: "1.5px solid #e67e22",
                           background: "transparent",
-                          color: marcandoId === c.id ? "#457b9d" : "#a8dadc",
+                          color: marcandoId === c.id ? "#457b9d" : "#e67e22",
                           cursor: marcandoId === c.id ? "not-allowed" : "pointer",
+                          fontWeight: 700,
                         }}
                       >
-                        {marcandoId === c.id ? "..." : "✕ Desmarcar"}
+                        {marcandoId === c.id ? "..." : "⚠ Marcar incompleta"}
                       </button>
                     </div>
                   </div>
