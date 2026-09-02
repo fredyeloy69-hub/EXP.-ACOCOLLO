@@ -64,7 +64,8 @@ const EVENTO_LABEL = {
   carpeta_borrada: "borró la carpeta",
   carpeta_movida: "movió la carpeta",
   carpeta_marcada_completa: "marcó como completa",
-  carpeta_desmarcada: "desmarcó",
+  carpeta_marcada_incompleta: "marcó como incompleta",
+  carpeta_desmarcada: "revirtió la marca de",
 };
 
 const EVENTO_COLOR = {
@@ -75,7 +76,8 @@ const EVENTO_COLOR = {
   carpeta_borrada: "#c0392b",
   carpeta_movida: "#e67e22",
   carpeta_marcada_completa: "#e5b80b",
-  carpeta_desmarcada: "#e67e22",
+  carpeta_marcada_incompleta: "#e67e22",
+  carpeta_desmarcada: "#457b9d",
 };
 
 const EVENTO_ICONO = {
@@ -86,6 +88,7 @@ const EVENTO_ICONO = {
   carpeta_borrada: "✕",
   carpeta_movida: "⇄",
   carpeta_marcada_completa: "✓",
+  carpeta_marcada_incompleta: "⚠",
   carpeta_desmarcada: "↺",
 };
 
@@ -227,7 +230,8 @@ export default function Dashboard() {
     }
   }
 
-  async function handleMarcarCompleta(folderId, forzada, folderName, folderRuta) {
+  // estado: "completa" | "incompleta" | null (null = revertir al cálculo automático)
+  async function handleMarcarCompleta(folderId, estado, folderName, folderRuta) {
     let user = auth.currentUser;
     if (!user) {
       try {
@@ -240,11 +244,14 @@ export default function Dashboard() {
     }
 
     let motivo = "";
-    if (forzada) {
+    if (estado === "completa") {
       motivo = window.prompt("¿Por qué se marca como completa manualmente?", "");
       if (motivo === null) return;
+    } else if (estado === "incompleta") {
+      motivo = window.prompt("¿Por qué se marca como incompleta manualmente?", "");
+      if (motivo === null) return;
     } else {
-      motivo = window.prompt("¿Por qué se marca como incompleta o se desmarca?", "");
+      motivo = window.prompt("¿Por qué se revierte esta marca manual? (opcional)", "");
       if (motivo === null) return;
     }
 
@@ -254,7 +261,7 @@ export default function Dashboard() {
       const res = await fetch("/api/marcar-completo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folderId, forzada, motivo, idToken, folderName, folderRuta }),
+        body: JSON.stringify({ folderId, estado, motivo, idToken, folderName, folderRuta }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -1234,7 +1241,7 @@ export default function Dashboard() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMarcarCompleta(c.id, !esCompleta, c.nombre, c.ruta);
+                                  handleMarcarCompleta(c.id, esCompleta ? "incompleta" : "completa", c.nombre, c.ruta);
                                 }}
                                 disabled={marcandoId === c.id}
                                 style={{
@@ -1489,21 +1496,22 @@ export default function Dashboard() {
                         <div style={{ fontSize: 13.5, color: "#a8dadc", marginTop: 3 }}>{c.ruta}</div>
                       </div>
                       <button
-                        onClick={() => handleMarcarCompleta(c.id, false, c.nombre, c.ruta)}
+                        onClick={() => handleMarcarCompleta(c.id, null, c.nombre, c.ruta)}
                         disabled={marcandoId === c.id}
+                        title="Quita la marca manual y deja que el próximo sync calcule el estado real"
                         style={{
                           flexShrink: 0,
                           fontSize: 12,
                           padding: "5px 12px",
                           borderRadius: 20,
-                          border: "1.5px solid #e67e22",
+                          border: "1.5px solid #457b9d",
                           background: "transparent",
-                          color: marcandoId === c.id ? "#457b9d" : "#e67e22",
+                          color: marcandoId === c.id ? "#457b9d" : "#a8dadc",
                           cursor: marcandoId === c.id ? "not-allowed" : "pointer",
                           fontWeight: 700,
                         }}
                       >
-                        {marcandoId === c.id ? "..." : "⚠ Marcar incompleta"}
+                        {marcandoId === c.id ? "..." : "↺ Revertir marca"}
                       </button>
                     </div>
                   </div>
