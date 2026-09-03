@@ -13,7 +13,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { generarReportePorArea, generarReporteConsolidadoGlobal } from "@/lib/exportarReporte";
-import { generarReporteExcelPorArea } from "@/lib/exportarExcel";
+import { generarReporteExcelPorArea, generarListaSeparadoresExcel } from "@/lib/exportarExcel";
 import { LOGO_PUNO_BASE64 } from "@/lib/logoPuno";
 import {
   getAuth,
@@ -137,6 +137,8 @@ export default function Page() {
   const [colapsoListo, setColapsoListo] = useState(false);
   const [exportandoArea, setExportandoArea] = useState(null);
   const [exportandoExcelArea, setExportandoExcelArea] = useState(null);
+  const [menuSeparadoresAbierto, setMenuSeparadoresAbierto] = useState(false);
+  const [exportandoSeparadores, setExportandoSeparadores] = useState(null);
   const [exportandoGlobal, setExportandoGlobal] = useState(false);
   const [modoPresentacion, setModoPresentacion] = useState(false);
   const [historial, setHistorial] = useState([]);
@@ -233,6 +235,26 @@ export default function Page() {
       alert(`No se pudo generar el Excel: ${err.message}`);
     } finally {
       setExportandoExcelArea(null);
+    }
+  }
+
+  // Lista de separadores: siempre usa TODAS las carpetas del área, sin
+  // filtro por estado — es un índice de secciones, no un reporte de avance.
+  async function handleExportarSeparadores(areaNombre, carpetasDelArea) {
+    setExportandoSeparadores(areaNombre);
+    setMenuSeparadoresAbierto(false);
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Tiempo de espera agotado al generar el Excel")), 10000)
+      );
+      await Promise.race([
+        generarListaSeparadoresExcel(areaNombre, carpetasDelArea),
+        timeoutPromise,
+      ]);
+    } catch (err) {
+      alert(`No se pudo generar la lista de separadores: ${err.message}`);
+    } finally {
+      setExportandoSeparadores(null);
     }
   }
 
@@ -624,6 +646,79 @@ export default function Page() {
               <span style={{ fontSize: 16 }}>📑</span>
               {exportandoGlobal ? "Generando Global..." : "Reporte Consolidado PDF"}
             </button>
+
+            {/* BOTÓN ESPECIAL — Fase 2: Lista para separadores (violeta, distinto al dorado/teal del resto) */}
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMenuSeparadoresAbierto((v) => !v)}
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  padding: "14px 18px",
+                  borderRadius: 14,
+                  border: "2px solid #A569BD",
+                  background: "linear-gradient(135deg,#2C1338,#141c24)",
+                  color: "#D7BDE2",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 0 16px rgba(165,105,189,.35)",
+                  letterSpacing: 0.2,
+                }}
+                title="Genera el índice numerado de secciones, listo para imprimir separadores físicos — Fase 2 del expediente"
+              >
+                <span style={{ fontSize: 16 }}>🗂️</span>
+                EXPORTAR LISTA PARA SEPARADORES
+                <span style={{ fontSize: 11, opacity: 0.8 }}>{menuSeparadoresAbierto ? "▲" : "▼"}</span>
+              </button>
+
+              {menuSeparadoresAbierto && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    left: 0,
+                    zIndex: 50,
+                    background: "#1B0E22",
+                    border: "2px solid #A569BD",
+                    borderRadius: 12,
+                    minWidth: 260,
+                    boxShadow: "0 8px 24px rgba(0,0,0,.5)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ padding: "9px 14px", fontSize: 11, fontWeight: 700, color: "#D7BDE2", borderBottom: "1px solid #A569BD55", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Elige la carpeta madre
+                  </div>
+                  {areas.map((a) => (
+                    <button
+                      key={a}
+                      onClick={() => handleExportarSeparadores(a, carpetasPorArea[a] || [])}
+                      disabled={exportandoSeparadores === a}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "11px 14px",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        background: "transparent",
+                        border: "none",
+                        borderBottom: "1px solid #A569BD22",
+                        color: exportandoSeparadores === a ? "#6B4A73" : "#D7BDE2",
+                        cursor: exportandoSeparadores === a ? "not-allowed" : "pointer",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#A569BD22")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      📊 {exportandoSeparadores === a ? `Generando ${a}...` : a}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <button
               onClick={() => setModoPresentacion((v) => !v)}
